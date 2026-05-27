@@ -2,21 +2,19 @@
 set -euo pipefail
 
 # vibecode-pro-max-kit installer
-# Full install with safe merge for both new and existing projects.
+# Clean install with backup for both new and existing projects.
+# Replaces .claude/, .codex/, .agents/, CLAUDE.md, AGENTS.md with kit versions.
+# Preserves: process/ (user content), .claude/settings.json (user config).
 # After this script, run Claude Code and say "Run vc-setup" to
 # auto-detect your project, scaffold process/, and populate context.
 
 REPO="https://github.com/withkynam/vibecode-pro-max-kit.git"
 TMPDIR="/tmp/vc-kit-install-$$"
+BACKUP_DIR=".vibecode-backup"
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
-
-INSTALLED=0
-PRESERVED=0
-BACKED_UP=0
-MERGED=0
 
 cleanup() { rm -rf "$TMPDIR" 2>/dev/null; }
 trap cleanup EXIT
@@ -35,88 +33,72 @@ VERSION=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$TMPDIR/vc
 echo "  Kit version: $VERSION"
 echo ""
 
-# ── Helper: merge a directory (copy only missing files/dirs) ──
-merge_dir() {
-  local src="$1" dst="$2"
-  mkdir -p "$dst"
-  for item in "$src"/*; do
-    local name=$(basename "$item")
-    if [ ! -e "$dst/$name" ]; then
-      cp -R "$item" "$dst/$name"
-      INSTALLED=$((INSTALLED + 1))
-    else
-      MERGED=$((MERGED + 1))
-    fi
-  done
-}
+# ══════════════════════════════════════════════════════
+# Backup existing setup (if any)
+# ══════════════════════════════════════════════════════
+HAS_EXISTING=false
+if [ -d ".claude" ] || [ -d ".codex" ] || [ -d ".agents" ] || [ -f "CLAUDE.md" ] || [ -f "AGENTS.md" ]; then
+  HAS_EXISTING=true
+  echo -e "  ${YELLOW}Existing setup detected.${NC} Backing up..."
+  mkdir -p "$BACKUP_DIR"
 
-# ── Helper: copy file if missing, preserve if exists ──
-copy_or_preserve() {
-  local src="$1" dst="$2"
-  if [ ! -f "$dst" ]; then
-    mkdir -p "$(dirname "$dst")"
-    cp "$src" "$dst"
-    INSTALLED=$((INSTALLED + 1))
-  else
-    PRESERVED=$((PRESERVED + 1))
-  fi
-}
+  # Back up directories
+  [ -d ".claude" ] && cp -R .claude "$BACKUP_DIR/.claude" && echo -e "    ${YELLOW}Backed up${NC} .claude/"
+  [ -d ".codex" ] && cp -R .codex "$BACKUP_DIR/.codex" && echo -e "    ${YELLOW}Backed up${NC} .codex/"
+  [ -d ".agents" ] && cp -R .agents "$BACKUP_DIR/.agents" && echo -e "    ${YELLOW}Backed up${NC} .agents/"
 
-# ── Helper: copy file, backup existing ──
-copy_with_backup() {
-  local src="$1" dst="$2"
-  if [ -f "$dst" ]; then
-    cp "$dst" "${dst}.pre-vibecode"
-    BACKED_UP=$((BACKED_UP + 1))
-    echo -e "    ${YELLOW}Backed up${NC} $dst → ${dst}.pre-vibecode"
+  # Back up root protocol files
+  [ -f "CLAUDE.md" ] && cp CLAUDE.md "$BACKUP_DIR/CLAUDE.md" && echo -e "    ${YELLOW}Backed up${NC} CLAUDE.md"
+  [ -f "AGENTS.md" ] && cp AGENTS.md "$BACKUP_DIR/AGENTS.md" && echo -e "    ${YELLOW}Backed up${NC} AGENTS.md"
+  [ -f "GUIDE.md" ] && cp GUIDE.md "$BACKUP_DIR/GUIDE.md" && echo -e "    ${YELLOW}Backed up${NC} GUIDE.md"
+
+  echo -e "    Backup at: ${CYAN}$BACKUP_DIR/${NC}"
+  echo ""
+
+  # Save user config before wiping
+  USER_SETTINGS=""
+  if [ -f ".claude/settings.json" ]; then
+    USER_SETTINGS=$(cat .claude/settings.json)
   fi
-  cp "$src" "$dst"
-  INSTALLED=$((INSTALLED + 1))
-}
+
+  # Clean slate — remove old agent tooling dirs
+  rm -rf .claude .codex .agents
+fi
 
 # ══════════════════════════════════════════════════════
-# Agents — merge (copy missing, skip existing)
+# Install kit — clean copy
 # ══════════════════════════════════════════════════════
 echo "  Installing agents..."
-merge_dir "$TMPDIR/.claude/agents" ".claude/agents"
-merge_dir "$TMPDIR/.codex/agents" ".codex/agents"
+mkdir -p .claude/agents .codex/agents
+cp -R "$TMPDIR/.claude/agents/"* .claude/agents/
+cp -R "$TMPDIR/.codex/agents/"* .codex/agents/
 
-# ══════════════════════════════════════════════════════
-# Skills — merge (copy missing skill dirs, skip existing)
-# ══════════════════════════════════════════════════════
 echo "  Installing skills..."
-merge_dir "$TMPDIR/.claude/skills" ".claude/skills"
+mkdir -p .claude/skills
+cp -R "$TMPDIR/.claude/skills/"* .claude/skills/
 
-# ══════════════════════════════════════════════════════
-# Hooks — merge (copy missing, preserve existing)
-# ══════════════════════════════════════════════════════
 echo "  Installing hooks..."
-merge_dir "$TMPDIR/.claude/hooks" ".claude/hooks"
-# Copy hook lib and scout-block subdirs
-[ -d "$TMPDIR/.claude/hooks/lib" ] && merge_dir "$TMPDIR/.claude/hooks/lib" ".claude/hooks/lib"
-[ -d "$TMPDIR/.claude/hooks/scout-block" ] && merge_dir "$TMPDIR/.claude/hooks/scout-block" ".claude/hooks/scout-block"
-# Codex hooks
-merge_dir "$TMPDIR/.codex/hooks" ".codex/hooks"
-[ -d "$TMPDIR/.codex/hooks/lib" ] && merge_dir "$TMPDIR/.codex/hooks/lib" ".codex/hooks/lib"
-[ -d "$TMPDIR/.codex/hooks/scout-block" ] && merge_dir "$TMPDIR/.codex/hooks/scout-block" ".codex/hooks/scout-block"
+mkdir -p .claude/hooks .codex/hooks
+cp -R "$TMPDIR/.claude/hooks/"* .claude/hooks/
+cp -R "$TMPDIR/.codex/hooks/"* .codex/hooks/
 
-# ══════════════════════════════════════════════════════
-# Config files — preserve existing (user's hook config)
-# ══════════════════════════════════════════════════════
 echo "  Installing configs..."
-copy_or_preserve "$TMPDIR/.claude/settings.json" ".claude/settings.json"
-copy_or_preserve "$TMPDIR/.codex/hooks.json" ".codex/hooks.json"
-copy_or_preserve "$TMPDIR/.codex/config.toml" ".codex/config.toml"
+# Settings: restore user's if they had one, otherwise use kit default
+if [ -n "${USER_SETTINGS:-}" ]; then
+  echo "$USER_SETTINGS" > .claude/settings.json
+  echo -e "    ${CYAN}Restored${NC} .claude/settings.json (your config)"
+else
+  cp "$TMPDIR/.claude/settings.json" .claude/settings.json
+fi
+cp "$TMPDIR/.codex/hooks.json" .codex/hooks.json
+cp "$TMPDIR/.codex/config.toml" .codex/config.toml
 
-# ══════════════════════════════════════════════════════
-# CLAUDE.md and AGENTS.md — backup existing, install kit version
-# ══════════════════════════════════════════════════════
 echo "  Installing protocol files..."
-copy_with_backup "$TMPDIR/CLAUDE.md" "CLAUDE.md"
-copy_with_backup "$TMPDIR/AGENTS.md" "AGENTS.md"
+cp "$TMPDIR/CLAUDE.md" CLAUDE.md
+cp "$TMPDIR/AGENTS.md" AGENTS.md
 
 # ══════════════════════════════════════════════════════
-# Process directory — seeds + protocols (overwrite managed), preserve user content
+# Process directory — managed parts only, preserve user content
 # ══════════════════════════════════════════════════════
 echo "  Installing process directory..."
 
@@ -124,33 +106,22 @@ echo "  Installing process directory..."
 rm -rf process/_seeds 2>/dev/null
 mkdir -p process
 cp -R "$TMPDIR/process/_seeds" process/
-INSTALLED=$((INSTALLED + 1))
 
 # Development protocols: always overwrite (managed system files)
 rm -rf process/development-protocols 2>/dev/null
 cp -R "$TMPDIR/process/development-protocols" process/
-INSTALLED=$((INSTALLED + 1))
 
 # Example PRDs: copy if missing
 mkdir -p process/context/planning
-copy_or_preserve "$TMPDIR/process/context/planning/example-simple-prd.md" "process/context/planning/example-simple-prd.md"
-copy_or_preserve "$TMPDIR/process/context/planning/example-complex-prd.md" "process/context/planning/example-complex-prd.md"
+[ ! -f "process/context/planning/example-simple-prd.md" ] && cp "$TMPDIR/process/context/planning/example-simple-prd.md" "process/context/planning/example-simple-prd.md"
+[ ! -f "process/context/planning/example-complex-prd.md" ] && cp "$TMPDIR/process/context/planning/example-complex-prd.md" "process/context/planning/example-complex-prd.md"
 
 # ══════════════════════════════════════════════════════
 # Symlinks
 # ══════════════════════════════════════════════════════
 echo "  Setting up symlinks..."
 mkdir -p .agents
-if [ -L ".agents/skills" ]; then
-  PRESERVED=$((PRESERVED + 1))
-elif [ -d ".agents/skills" ]; then
-  rm -rf .agents/skills
-  ln -s ../.claude/skills .agents/skills
-  INSTALLED=$((INSTALLED + 1))
-else
-  ln -s ../.claude/skills .agents/skills
-  INSTALLED=$((INSTALLED + 1))
-fi
+ln -sf ../.claude/skills .agents/skills
 
 # ══════════════════════════════════════════════════════
 # Manifest + version
@@ -163,13 +134,25 @@ cleanup
 # ══════════════════════════════════════════════════════
 # Summary
 # ══════════════════════════════════════════════════════
+AGENT_COUNT=$(ls .claude/agents/*.md 2>/dev/null | wc -l | tr -d ' ')
+SKILL_COUNT=$(ls -d .claude/skills/*/ 2>/dev/null | wc -l | tr -d ' ')
+HOOK_COUNT=$(ls .claude/hooks/*.cjs 2>/dev/null | wc -l | tr -d ' ')
+
 echo ""
 echo -e "  ${GREEN}Install complete.${NC} (v$VERSION)"
 echo ""
-echo -e "    ${CYAN}Installed${NC}:  $INSTALLED items"
-[ $PRESERVED -gt 0 ] && echo -e "    ${YELLOW}Preserved${NC}:  $PRESERVED existing files (your configs are safe)"
-[ $BACKED_UP -gt 0 ] && echo -e "    ${YELLOW}Backed up${NC}:  $BACKED_UP files (.pre-vibecode suffix)"
-[ $MERGED -gt 0 ] && echo -e "    ${CYAN}Merged${NC}:     $MERGED items (existing kept, missing added)"
+echo -e "    ${CYAN}Agents${NC}:     $AGENT_COUNT (Claude Code + Codex)"
+echo -e "    ${CYAN}Skills${NC}:     $SKILL_COUNT"
+echo -e "    ${CYAN}Hooks${NC}:      $HOOK_COUNT"
+echo -e "    ${CYAN}Protocols${NC}:  6 development protocols"
+echo -e "    ${CYAN}Seeds${NC}:      $(find process/_seeds -type f 2>/dev/null | wc -l | tr -d ' ') template files"
+
+if [ "$HAS_EXISTING" = true ]; then
+  echo ""
+  echo -e "  ${YELLOW}Previous setup backed up to ${CYAN}$BACKUP_DIR/${NC}"
+  echo -e "  ${YELLOW}Your process/ directory was preserved (plans, context, features).${NC}"
+fi
+
 echo ""
 echo "  Next:"
 echo "    1. Run: claude"
@@ -179,4 +162,3 @@ echo "  vc-setup will auto-detect your project, scaffold the process/"
 echo "  directory, deep-scan your codebase, and populate context with"
 echo "  your real architecture, patterns, test commands, and conventions."
 echo ""
-[ $BACKED_UP -gt 0 ] && echo -e "  ${YELLOW}Note:${NC} Your original CLAUDE.md was backed up. Move any custom" && echo "  instructions to process/context/all-context.md after setup." && echo ""
