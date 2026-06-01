@@ -91,40 +91,8 @@ Compare the remote manifest `version` against `currentVersion`.
 - **Modifications:** Files in both lists -- compare content via `diff` between `$TMPDIR/{path}` and `{projectRoot}/{path}`.
   - If identical: **unchanged**.
   - If different: **modified** (note line count changes).
-- **Merge files:** Files in the `merge` list that have local changes. Split into two sub-types:
-  - **Smart-merge** (`CLAUDE.md`, `AGENTS.md`): the agent performs an intelligent merge (see Smart Merge below). Show a preview of what will be applied vs preserved.
-  - **Simple-merge** (everything else in `merge`, e.g. `.claude/settings.json`): preserve local version entirely, show diff, flag for manual review.
+- **Merge files:** Files in the `merge` list (e.g. `.claude/settings.json`) that have local changes. Preserve local version entirely, show diff, flag for manual review.
 - **Copy-if-missing files:** Files in the `copyIfMissing` list that already exist locally. Show the diff but note they will NOT be overwritten.
-
-### Smart Merge (CLAUDE.md and AGENTS.md)
-
-`CLAUDE.md` and `AGENTS.md` contain both harness methodology (owned by the kit) and
-project-specific content (owned by the project). When these files differ between the remote
-and local versions, perform a smart merge rather than preserving or overwriting entirely.
-
-**Apply from remote (harness methodology — kit owns these):**
-- New or changed entries in the "Shared Development Protocols" file list
-  (lines listing files under `process/development-protocols/`)
-- New or changed entries in the "Reference docs" block under development-protocols
-- Changes to orchestrator role description, routing protocol, or mode detection sections
-- New rows or changed rows in the skill registry table
-- Changes to phase transition rules, closeout rules, or parallel fan-out checkpoints
-- Any section that exists in the remote but is entirely absent locally
-
-**Preserve from local (project-specific — project owns these):**
-- The `process/context/` section bullet list and all context group entries
-  (e.g. `platform/all-platform.md`, `backend/all-backend.md`, `uxui/all-uxui.md`)
-- Technology stack section content
-- Coding preferences that differ from kit defaults (package manager, TS style, etc.)
-- Current features list
-- Any section or bullet that exists locally but is absent from the remote
-
-**Conflict rule:** when the same line exists in both but with different content, prefer the
-remote (kit) version for methodology sections and the local version for context/stack sections.
-When genuinely ambiguous, prefer local and flag the line in the summary.
-
-**Output:** after performing the smart merge, write the merged result to the local file and
-report what was applied vs preserved in the dry-run preview and applied summary.
 
 ### Step 7: Check Symlinks
 
@@ -147,10 +115,6 @@ FILES:
   [removed]   .claude/skills/deprecated-skill/SKILL.md
   [unchanged] .claude/agents/vc-debugger.md
   ...
-
-SMART-MERGE (will be applied automatically):
-  [smart]     CLAUDE.md  — apply: +3 protocol lines  |  preserve: context groups, tech stack
-  [smart]     AGENTS.md  — apply: +2 protocol lines  |  preserve: context groups
 
 MERGE (preserved, manual review needed):
   [differs]   .claude/settings.json  (+2 -1)
@@ -183,10 +147,7 @@ If the user aborts:
 On user confirmation, apply in this order:
 
 1. **Additions and modifications**: For each file in the remote `files` list:
-   - If file is `CLAUDE.md` or `AGENTS.md` AND exists locally AND differs: perform smart merge
-     (apply methodology changes, preserve project-specific content per Smart Merge rules above).
-     Write merged result to local file.
-   - Skip if file is in `merge` list (but NOT a smart-merge file) AND exists locally (preserve user version).
+   - Skip if file is in `merge` list AND exists locally (preserve user version).
    - Skip if file is in `copyIfMissing` list AND exists locally (preserve user version).
    - Otherwise: `mkdir -p` the parent directory, copy from `$TMPDIR/{path}` to `{projectRoot}/{path}`.
 
@@ -220,7 +181,6 @@ Applied:
   2 files added
   1 file removed
   1 symlink fixed
-  2 smart-merged (CLAUDE.md: +3 applied, context groups preserved | AGENTS.md: +2 applied)
   1 merge file preserved (review .claude/settings.json manually)
 
 Snapshot written to .vc-installed-files
@@ -234,8 +194,8 @@ Version written to .vc-version: {remoteVersion}
 - Always show the dry-run diff before applying. Never apply without user confirmation.
 - Clean up the temp clone directory even on error or abort.
 - If `.vc-version` is missing, treat as version `0.0.0` (first update, apply everything).
-- `CLAUDE.md` and `AGENTS.md` are smart-merged: methodology sections updated from kit, project-specific sections (context groups, tech stack, features) preserved. Never fully overwritten, never fully skipped.
-- Other files in the `merge` list (e.g. `.claude/settings.json`) are never overwritten if they exist locally. Show the diff for manual review.
+- `CLAUDE.md` and `AGENTS.md` are harness-only files — overwritten freely on update. Project-specific content belongs in `process/context/all-context.md`, not in these files.
+- Files in the `merge` list (e.g. `.claude/settings.json`) are never overwritten if they exist locally. Show the diff for manual review.
 - Files in the `copyIfMissing` list are only installed if they don't already exist locally.
 - Removals are detected by comparing the local `.vc-installed-files` snapshot against the new resolved file list.
 

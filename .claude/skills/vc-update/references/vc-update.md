@@ -34,7 +34,7 @@ The manifest uses glob-based patterns resolved by `resolve-manifest.mjs`.
     ".claude/skills/vc-chrome-devtools/scripts/node_modules/**"
   ],
   "strip": [],
-  "merge": [".claude/settings.json", "CLAUDE.md", "AGENTS.md"],
+  "merge": [".claude/settings.json"],
   "copyIfMissing": [],
   "symlinks": { ".agents/skills": "../.claude/skills" },
   "kitOnly": [
@@ -146,18 +146,11 @@ If the user has intentional local changes to a managed file:
 2. Re-apply after the update
 3. Or better: move customizations to `process/context/` where they belong
 
-### Smart-merge files (CLAUDE.md, AGENTS.md)
+### Merge files (.claude/settings.json)
 
-`CLAUDE.md` and `AGENTS.md` contain both harness methodology (kit-owned) and project-specific content (project-owned). The agent performs an intelligent merge:
+Files in the `merge` list are NEVER overwritten if they exist locally. The dry-run shows the diff so the user can manually reconcile. On fresh install (no existing file), the kit version is installed.
 
-- **Apply from remote:** new/changed entries in the development-protocols file list, reference docs block, orchestrator routing sections, skill registry table, phase transition rules.
-- **Preserve from local:** `process/context/` bullet list and all context group entries, technology stack section, coding preferences, current features list, any section absent from the remote.
-
-The dry-run shows a preview (`apply: +N lines | preserve: context groups, tech stack`). On apply, the merged file is written and the summary reports what was applied vs preserved.
-
-### Simple-merge files (.claude/settings.json)
-
-Files in the `merge` list (other than smart-merge files) are NEVER overwritten if they exist locally. The dry-run shows the diff so the user can manually reconcile. On fresh install (no existing file), the kit version is installed.
+`CLAUDE.md` and `AGENTS.md` are harness-only files — overwritten freely on update like any other managed file. Project-specific content (context groups, tech stack, features) belongs in `process/context/all-context.md`, which vc-update never touches.
 
 ### Copy-if-missing files (example PRDs)
 

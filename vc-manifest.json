@@ -1,5 +1,5 @@
 {
-  "version": "2.4.0",
+  "version": "2.4.1",
   "include": [
     ".claude/agents/**",
     ".claude/skills/**",
@@ -25,10 +25,7 @@
     ".codex/statusline.cjs",
     ".claude/skills/vc-chrome-devtools/scripts/node_modules/**"
   ],
-  "strip": [
-    "CLAUDE.md",
-    "AGENTS.md"
-  ],
+  "strip": [],
   "merge": [
     ".claude/settings.json"
   ],
