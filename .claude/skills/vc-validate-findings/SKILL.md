@@ -71,7 +71,7 @@ Trigger when **any one** of the following is true:
 
 **Quality difference in practice:**
 - Simple: Layer 1 infra agent infers container port assignments from plan description text
-- Deep: Layer 1 infra agent reads `process/context/container/` and knows the real port table (gateway:3000, file-server:3001, app-dev:3002, ctx-gateway:3099, browser-bridge:9377, MITM:9090/9091) — can catch real port conflicts the plan missed
+- Deep: Layer 1 infra agent reads the container context group (process/context/container/ or the repo's equivalent routing entrypoint) and knows the real port table (gateway:3000, file-server:3001, app-dev:3002, ctx-gateway:3099, browser-bridge:9377, MITM:9090/9091) — can catch real port conflicts the plan missed
 
 ---
 
