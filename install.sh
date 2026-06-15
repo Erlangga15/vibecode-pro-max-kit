@@ -128,12 +128,12 @@ MISSING_DECLARED=$(echo "$MANIFEST_JSON" | node -e "
 
 # ── Kit-integrity guard: warn when manifest-declared files are absent from source ──
 if [ -n "$MISSING_DECLARED" ]; then
-  echo -e "  ${YELLOW}⚠ WARNING: kit integrity issue — declared files missing from kit source:${NC}" >&2
+  echo -e "  ${YELLOW}⚠ WARNING: Kit integrity check failed — the following declared kit files were not found on disk.${NC}" >&2
   while IFS= read -r mdf; do
     [ -z "$mdf" ] && continue
     echo -e "    ${YELLOW}missing:${NC} $mdf" >&2
   done <<< "$MISSING_DECLARED"
-  echo -e "  ${YELLOW}  → kit may be a partial/corrupted clone — re-clone the kit before relying on this install${NC}" >&2
+  echo -e "  ${YELLOW}  → The kit clone may be partial or corrupt. Re-clone the kit before updating.${NC}" >&2
   echo "" >&2
 fi
 
