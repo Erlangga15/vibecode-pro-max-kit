@@ -1,11 +1,11 @@
 ---
 name: vc-intent-clarify
-description: "Use when routing a user request to clarify intent before RIPER-5 phase delegation. Scores ambiguity with 4 binary signals, then generates structured multi-choice questions across 8+ dimensions for Tier 2. Questions are grouped, CRITICAL-flagged, and always include recommended options. Two-mode: SIMPLE (direct, 3-5 reads) and DEEP (research subagent first, then questions)."
+description: "Clarify intent before RIPER-5 phase delegation. Scores ambiguity (4 signals); generates structured multi-choice questions for Tier 2. Two-mode: SIMPLE and DEEP."
 argument-hint: "[user request text]"
 trigger_keywords: intent clarification, ambiguity score, routing tier, clarify request
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "2.1.0"
 ---
 

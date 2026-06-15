@@ -25,10 +25,17 @@ import path from "node:path";
 import { execSync } from "node:child_process";
 
 const rootFlagIndex = process.argv.indexOf("--root");
-const root =
-  rootFlagIndex === -1
-    ? execSync("git rev-parse --show-toplevel").toString().trim()
-    : path.resolve(process.argv[rootFlagIndex + 1] ?? "");
+let root;
+if (rootFlagIndex !== -1) {
+  root = path.resolve(process.argv[rootFlagIndex + 1] ?? "");
+} else {
+  try {
+    root = execSync("git rev-parse --show-toplevel", { stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
+  } catch {
+    // Not a git repository — fall back to process.cwd() so the script still works on new projects.
+    root = process.cwd();
+  }
+}
 const failures = [];
 const warnings = [];
 

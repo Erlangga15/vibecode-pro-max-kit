@@ -94,8 +94,48 @@
 
 ---
 
+## Quick Start
+
+### New project — install the harness
+
+> **Prerequisites:** Node.js ≥ 22, git, and bash (macOS/Linux/WSL; Alpine: `apk add bash`).
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/withkynam/vibecode-pro-max-kit/main/install.sh | bash
+```
+
+Then open Claude Code and say: **"Run vc-setup"**
+
+Codex users: run `/vc-setup`
+
+> vc-setup will detect your project, scaffold `process/`, and populate context with real architecture and conventions.
+
+---
+
+### Existing project — update the harness
+
+Open Claude Code and say: **"Run vc-update"**
+
+> vc-update computes a surgical diff, shows you what will change, and waits for your confirmation before touching anything.
+
+---
+
+### First-time setup after install
+
+Open Claude Code and say: **"Run vc-setup"**
+
+---
+
+> **Note:** Install is non-destructive. Your existing `.claude/skills/`, `.claude/agents/`, `process/`, and settings files are never deleted. Only kit-owned files (vc-prefixed skills/agents, hooks, protocol docs, CLAUDE.md, AGENTS.md) are written or updated.
+>
+> **Pre-snapshot caveat:** If you have custom skills or agents whose names start with `vc-` (i.e., they look like kit files) and you have never run install.sh before on this project, those files may be treated as stale kit files during the legacyDeletions cleanup step. After install, run `ls .claude/skills/ .claude/agents/` to verify your custom files survived. This is a one-time edge case on very first install.
+
+---
+
 ## 🚀 Install (30 seconds)
 
+> **Prerequisites:** Node.js ≥ 22, git, and bash (macOS/Linux/WSL; Alpine: `apk add bash`).
+>
 > **Run this inside your project folder.** Open a terminal and `cd` into the project you want the harness installed into *before* running the command — it installs into the current directory.
 >
 > Prefer to drive it from your agent? Open Claude Code or Codex **with that project folder as the working directory**, then paste the [full setup prompt](#-full-agent-setup-prompt) below.
@@ -110,6 +150,8 @@ Then open Claude Code and say:
 Run vc-setup
 ```
 
+Codex users: run `/vc-setup`
+
 That's it. The setup skill detects your stack, asks about your project (a real conversation, not a checklist), scaffolds the process directory, deep-scans your codebase, and populates context files with actual content — not placeholders.
 
 <br>
@@ -122,16 +164,16 @@ That's it. The setup skill detects your stack, asks about your project (a real c
 ```
 your-project/
 ├── .claude/
-│   ├── agents/              # 🤖 12 specialized agent definitions
+│   ├── agents/              # 🤖 15 specialized agent definitions
 │   │   ├── vc-research-agent.md
 │   │   ├── vc-execute-agent.md
 │   │   └── ...
-│   ├── skills/              # ⚡ 31 auto-discovered skills
+│   ├── skills/              # ⚡ 33 auto-discovered skills
 │   │   ├── vc-generate-plan/
 │   │   ├── vc-security/
 │   │   ├── vc-scout/
 │   │   └── ...
-│   └── hooks/               # 🪝 7 lifecycle hooks
+│   └── hooks/               # 🪝 10 lifecycle hooks
 │       ├── privacy-block.cjs
 │       ├── scout-block.cjs
 │       └── ...
@@ -275,7 +317,7 @@ Whether you're a developer, a PM, or a CEO who just started vibe coding — this
 
 ## 🛠️ The Fix
 
-This harness installs a complete development system into your project — not just a CLAUDE.md file, but **12 specialized agents, 31 skills**, and a phase-locked workflow that forces your agent to **understand before it builds**.
+This harness installs a complete development system into your project — not just a CLAUDE.md file, but **15 specialized agents, 33 skills**, and a phase-locked workflow that forces your agent to **understand before it builds**.
 
 <br>
 
@@ -431,13 +473,13 @@ It researches your current auth code and how other codebases solved RBAC, writes
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🤖</h1>
-<h3>12</h3>
+<h3>15</h3>
 <strong>Specialized Agents</strong><br>
 <sub>Domain experts that own each development phase</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>⚡</h1>
-<h3>32</h3>
+<h3>33</h3>
 <strong>Auto-Discovered Skills</strong><br>
 <sub>Reusable capabilities surfaced by keyword matching</sub>
 </td>
@@ -445,13 +487,13 @@ It researches your current auth code and how other codebases solved RBAC, writes
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🪝</h1>
-<h3>7</h3>
+<h3>10</h3>
 <strong>Lifecycle Hooks</strong><br>
 <sub>Pre/post execution guardrails and context injection</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>📜</h1>
-<h3>6</h3>
+<h3>8</h3>
 <strong>Development Protocols</strong><br>
 <sub>Shared workflow rules across all tools</sub>
 </td>
@@ -473,9 +515,9 @@ It researches your current auth code and how other codebases solved RBAC, writes
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🌍</h1>
-<h3>6</h3>
+<h3>10</h3>
 <strong>Languages</strong><br>
-<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Português</sub>
+<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Português · Deutsch · Français · Español · हिन्दी</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>⚡</h1>
@@ -572,7 +614,7 @@ Every completed feature feeds learnings back into the context system.
 | Multi-tool support | 7 tools via AGENTS.md + native | Claude Code plugin | 14 runtimes | 1 tool |
 | Auto-improving context | Domain-routed context groups, updates after every feature | Plugin memory | Disk-persisted state | Manual |
 | Team collaboration | Shared specs, plans, and review artifacts | Solo | Solo | Solo |
-| Skills system | 32 auto-discovered, keyword-matched at every prompt | 86 composable skills | Meta-prompting | 23 role tools |
+| Skills system | 33 auto-discovered, keyword-matched at every prompt | 86 composable skills | Meta-prompting | 23 role tools |
 | Multi-phase programs | Umbrella plans + phase-by-phase execution loop with regression checks | Single task | Single task | Single task |
 | Quality pipeline | 6-step chain (code-review → test → simplify → security → audit → commit) | Per-skill quality | No auto-chain | No auto-chain |
 | Installation | 30-second `curl` install + auto-setup | Plugin marketplace | npx one-liner | git clone |
@@ -605,7 +647,7 @@ Detects your intent from natural language. "build webhook support" → full pipe
 <td width="50%" valign="top">
 <h1>🔍</h1>
 <strong>Automatic Skill Discovery</strong><br><br>
-Before routing any request, scans <strong>32 skills</strong> and matches keywords. Say "add webhook support" and <code>vc-security</code> + <code>vc-scenario</code> surface automatically.
+Before routing any request, scans <strong>33 skills</strong> and matches keywords. Say "add webhook support" and <code>vc-security</code> + <code>vc-scenario</code> surface automatically.
 </td>
 <td width="50%" valign="top">
 <h1>💾</h1>
@@ -901,15 +943,15 @@ process/
 │   │   └── webhooks_PLAN_28-05-26.md
 │   ├── completed/               # ✅ Archived plans (searchable history)
 │   ├── backlog/                 # 📌 Deferred work
-│   ├── reports/                 # 📄 Cross-cutting reports
-│   └── references/              # 📚 Research outputs
+│   ├── reports/                 # 📄 (deprecated — artifacts go inside task folders)
+│   └── references/              # 📚 (deprecated — artifacts go inside task folders)
 └── features/
     └── billing/                 # 🏷️ Feature-scoped (5+ artifacts)
         ├── active/
         ├── completed/
         ├── backlog/
-        ├── reports/
-        └── references/
+        ├── reports/             # 📄 (deprecated — artifacts go inside task folders)
+        └── references/          # 📚 (deprecated — artifacts go inside task folders)
 ```
 
 ---
@@ -998,7 +1040,7 @@ process/context/
 ├── uxui/
 │   └── all-uxui.md             # 🎨 Components, design tokens, patterns
 ├── infra/
-│   └── all-infra.md            # 🖥️ Worker nodes, provisioning, DNS
+│   └── all-infra.md            # 🖥️ Server infrastructure, deployment
 ├── skills/
 │   └── all-skills.md           # ⚡ Skill runtime, app architecture
 ├── workflows/
@@ -1029,8 +1071,8 @@ process/features/{feature}/
 ├── active/       # 📋 Plans currently being worked on
 ├── completed/    # ✅ Archived plans (searchable decision history)
 ├── backlog/      # 📌 Deferred work (agents check before duplicating)
-├── reports/      # 📄 Execution reports, post-mortems, validation results
-└── references/   # 📚 Research outputs that inform future decisions
+├── reports/      # 📄 (deprecated — artifacts go inside task folders)
+└── references/   # 📚 (deprecated — artifacts go inside task folders)
 ```
 
 <br>
@@ -1107,9 +1149,11 @@ process/features/{feature}/
 
 </details>
 
+> **⚠️ Naming rule for custom skills and agents:** Do NOT use the `vc-` prefix for your own skills or agents. The `vc-` namespace is reserved for kit-shipped artifacts. The install/update stale-removal guard treats any path matching `vc-*` under `.claude/skills/` and `.claude/agents/` as a kit-owned file — a custom `vc-foo` skill or `vc-my-agent.md` could be flagged for removal on the next `vc-update` run. Use any other prefix (e.g. `my-`, `team-`, `proj-`) for your custom additions.
+
 <br>
 
-### 🪝 7 Hooks
+### 🪝 10 Hooks
 
 | Hook | What it does |
 |------|-------------|
@@ -1120,17 +1164,20 @@ process/features/{feature}/
 | ✨ **Edit quality** | After 5+ edits, nudges to run code-simplifier (non-blocking, throttled) |
 | 📛 **Descriptive naming** | Language-aware file naming conventions on every Write |
 | 📊 **Usage tracking** | Session metrics and token awareness |
+| 📋 **Plan structure check** (`post-write-plan-check.mjs`) | Validates plan artifact structure on every Write to a `*_PLAN_*.md` file |
+| 🧹 **Commit message lint** (`post-commit-lint.mjs`) | Checks conventional-commits prefix on every `git commit` Bash call |
+| 🔍 **Stop validator sweep** (`stop-validator-sweep.cjs`) | Runs core harness validators when the agent session stops |
 
 <br>
 
 **Where everything lives:**
 
-```
+```text
 your-project/
 ├── .claude/
-│   ├── agents/              # 🤖 12 agent definitions (.md)
-│   ├── skills/              # ⚡ 31 skill modules (each a directory with SKILL.md)
-│   └── hooks/               # 🪝 7 lifecycle hooks (.cjs)
+│   ├── agents/              # 🤖 15 agent definitions (.md)
+│   ├── skills/              # ⚡ 33 skill modules (each a directory with SKILL.md)
+│   └── hooks/               # 🪝 10 lifecycle hooks (.cjs and .mjs)
 ├── .codex/
 │   └── agents/              # 🔄 Mirrored for Codex compatibility
 ├── .agents/
@@ -1150,7 +1197,7 @@ your-project/
 
 Pull the latest harness improvements:
 
-```
+```text
 Run vc-update
 ```
 
@@ -1181,9 +1228,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ### 🙏 Credits
 
-This project benefited from [ClaudeKit](https://claudekit.cc/?ref=OEOM7R7G) by [@mrgoonie](https://github.com/mrgoonie) — particularly skills like `ck:xia` which inspired some of ours.
-
-The difference: vibecode-pro-max-kit focuses on the spec-driven development framework and self-improving context organization, without bloating you with 80+ skills. Fewer tools, more structure.
+vibecode-pro-max-kit focuses on the spec-driven development framework and self-improving context organization, without bloating you with 80+ skills. Fewer tools, more structure.
 
 ---
 

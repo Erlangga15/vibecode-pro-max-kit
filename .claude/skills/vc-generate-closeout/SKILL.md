@@ -5,7 +5,7 @@ argument-hint: "[selected plan path or phase name]"
 trigger_keywords: closeout, phase closeout, archive readiness, drift scoring, move-on
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

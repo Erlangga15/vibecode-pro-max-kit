@@ -3,7 +3,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 
-const root = execSync('git rev-parse --show-toplevel').toString().trim();
+let root;
+try {
+  root = execSync('git rev-parse --show-toplevel', { stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
+} catch {
+  // Not a git repository — fall back to process.cwd() so the script still works on new projects.
+  root = process.cwd();
+}
 const failures = [];
 const warnings = [];
 const ignoredSkillFrontmatter = new Set(["sync-from-riper5", "sync-to-riper5"]);
@@ -150,50 +156,62 @@ for (const agent of codexAgents) {
   if (!claudeAgents.includes(agent)) fail(`.claude/agents/${agent}.md missing`);
 }
 
+// Bare-kit mode: process/context/all-context.md is intentionally absent in a freshly
+// cloned kit template. Skip all per-project context-doc checks in that case — they
+// require a populated context tree that vc-setup creates after install.
 const router = "process/context/all-context.md";
-if (!exists(router)) fail(`${router} missing`);
-const routerText = exists(router) ? read(router) : "";
+const bareKitMode = !exists(router);
 
-const contextDocs = walk("process/context", (rel) => rel.endsWith(".md")).sort();
-for (const doc of contextDocs) {
-  if (doc === router) continue;
-  const relFromContext = doc.replace(/^process\/context\//, "");
-  const group = relFromContext.split("/")[0];
-  const groupEntrypoint = getGroupEntrypoint(group);
-  const indexedByRouter = routerText.includes(relFromContext) || routerText.includes(doc);
-  const indexedByGroup = groupEntrypoint && read(groupEntrypoint).includes(path.basename(doc));
-
-  if (relFromContext.includes("/") && !groupEntrypoint) {
-    fail(`context group ${group} is missing all-${group}.md`);
-  }
-  if (!indexedByRouter && !indexedByGroup) {
-    fail(`${doc} is not indexed by process/context/all-context.md or its group entrypoint`);
-  }
+if (bareKitMode) {
+  process.stderr.write(
+    "[bare-kit mode] process/context/all-context.md absent — skipping per-project context-doc checks (kit template not yet set up).\n",
+  );
 }
 
-for (const dir of fs.readdirSync(path.join(root, "process/context"), { withFileTypes: true })) {
-  if (dir.isDirectory() && !getGroupEntrypoint(dir.name)) {
-    fail(`process/context/${dir.name}/ is missing all-${dir.name}.md`);
-  }
-}
+const routerText = bareKitMode ? "" : read(router);
 
-for (const legacy of legacyEntrypoints) {
-  if (exists(legacy)) {
-    fail(`legacy context entrypoint still exists: ${legacy}`);
-  }
-}
+if (!bareKitMode) {
+  const contextDocs = walk("process/context", (rel) => rel.endsWith(".md")).sort();
+  for (const doc of contextDocs) {
+    if (doc === router) continue;
+    const relFromContext = doc.replace(/^process\/context\//, "");
+    const group = relFromContext.split("/")[0];
+    const groupEntrypoint = getGroupEntrypoint(group);
+    const indexedByRouter = routerText.includes(relFromContext) || routerText.includes(doc);
+    const indexedByGroup = groupEntrypoint && read(groupEntrypoint).includes(path.basename(doc));
 
-for (const file of [
-  "AGENTS.md",
-  "CLAUDE.md",
-  ".claude/agents/vc-update-process-agent.md",
-  ".codex/agents/vc-update-process-agent.toml",
-  ".claude/agents/vc-research-agent.md",
-  ".codex/agents/vc-research-agent.toml",
-  ".claude/skills/vc-generate-context/SKILL.md",
-  ".claude/skills/vc-generate-context/references/generate-context.md",
-]) {
-  assertContains(file, "process/context/all-context.md");
+    if (relFromContext.includes("/") && !groupEntrypoint) {
+      fail(`context group ${group} is missing all-${group}.md`);
+    }
+    if (!indexedByRouter && !indexedByGroup) {
+      fail(`${doc} is not indexed by process/context/all-context.md or its group entrypoint`);
+    }
+  }
+
+  for (const dir of fs.readdirSync(path.join(root, "process/context"), { withFileTypes: true })) {
+    if (dir.isDirectory() && !getGroupEntrypoint(dir.name)) {
+      fail(`process/context/${dir.name}/ is missing all-${dir.name}.md`);
+    }
+  }
+
+  for (const legacy of legacyEntrypoints) {
+    if (exists(legacy)) {
+      fail(`legacy context entrypoint still exists: ${legacy}`);
+    }
+  }
+
+  for (const file of [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/agents/vc-update-process-agent.md",
+    ".codex/agents/vc-update-process-agent.toml",
+    ".claude/agents/vc-research-agent.md",
+    ".codex/agents/vc-research-agent.toml",
+    ".claude/skills/vc-generate-context/SKILL.md",
+    ".claude/skills/vc-generate-context/references/generate-context.md",
+  ]) {
+    assertContains(file, "process/context/all-context.md");
+  }
 }
 
 const criticalHookParityPairs = [
@@ -225,6 +243,9 @@ const staleWorkflowPatterns = [
   { pattern: "vc:code-review", reason: "review ownership was absorbed into code-reviewer" },
   { pattern: "/vc:journal", reason: "journal handoff is not part of the surviving default workflow surface" },
 ];
+// In bare-kit mode, skip scanning process/context/ files for stale patterns
+// (the directory may not exist yet). Kit-structural files (.claude, .codex, AGENTS.md)
+// are always scanned.
 const staleWorkflowFiles = [
   "AGENTS.md",
   "CLAUDE.md",
@@ -233,7 +254,7 @@ const staleWorkflowFiles = [
   ...walk(".claude/skills", (rel) => rel.endsWith(".md") && !rel.includes("/scripts/")),
   ...walk(".claude/hooks", (rel) => rel.endsWith(".cjs") || rel.endsWith(".json")),
   ...walk(".codex/hooks", (rel) => rel.endsWith(".cjs") || rel.endsWith(".json")),
-  ...walk("process/context", (rel) => rel.endsWith(".md")),
+  ...(bareKitMode ? [] : walk("process/context", (rel) => rel.endsWith(".md"))),
 ];
 
 for (const file of staleWorkflowFiles) {
@@ -263,38 +284,43 @@ for (const file of staleWorkflowFiles) {
   }
 }
 
-const filesWithRefs = [
-  "AGENTS.md",
-  ...walk(".claude", (rel) => rel.endsWith(".md") || rel.endsWith(".json")),
-  ...walk(".codex", (rel) => rel.endsWith(".toml") || rel.endsWith(".json")),
-  ...walk("process/context", (rel) => rel.endsWith(".md")),
-];
+// Concrete-ref validation: in bare-kit mode, process/context/ docs are absent by design,
+// so refs from .claude/.codex files pointing to them would false-fail. Skip in bare-kit mode.
+let concreteRefs = [];
+if (!bareKitMode) {
+  const filesWithRefs = [
+    "AGENTS.md",
+    ...walk(".claude", (rel) => rel.endsWith(".md") || rel.endsWith(".json")),
+    ...walk(".codex", (rel) => rel.endsWith(".toml") || rel.endsWith(".json")),
+    ...walk("process/context", (rel) => rel.endsWith(".md")),
+  ];
 
-const concreteRefs = [];
-for (const file of filesWithRefs) {
-  if (!exists(file)) continue;
-  const text = read(file);
-  for (const match of text.matchAll(/`(process\/context\/[^`\s]+)`/g)) {
-    const ref = match[1].replace(/[.,;:]$/, "");
-    if (/[{}[*\]]/.test(ref)) continue;
-    concreteRefs.push({ file, ref });
+  for (const file of filesWithRefs) {
+    if (!exists(file)) continue;
+    const text = read(file);
+    for (const match of text.matchAll(/`(process\/context\/[^`\s]+)`/g)) {
+      const ref = match[1].replace(/[.,;:]$/, "");
+      if (/[{}[*\]]/.test(ref)) continue;
+      concreteRefs.push({ file, ref });
+    }
+  }
+
+  for (const { file, ref } of concreteRefs) {
+    if (!exists(ref)) fail(`${file} references missing ${ref}`);
+  }
+
+  const contextDocsForCheck = walk("process/context", (rel) => rel.endsWith(".md")).sort();
+  if (contextDocsForCheck.length > 0 && !routerText.includes("Context Group Lifecycle")) {
+    fail(`${router} missing Context Group Lifecycle section`);
+  }
+
+  if (routerText.includes("Suggested future groups")) {
+    warn("context group migration is planned but not fully executed yet");
   }
 }
 
-for (const { file, ref } of concreteRefs) {
-  if (!exists(ref)) fail(`${file} references missing ${ref}`);
-}
-
-if (contextDocs.length > 0 && !routerText.includes("Context Group Lifecycle")) {
-  fail(`${router} missing Context Group Lifecycle section`);
-}
-
-if (routerText.includes("Suggested future groups")) {
-  warn("context group migration is planned but not fully executed yet");
-}
-
 const result = {
-  checkedContextDocs: contextDocs.length,
+  checkedContextDocs: bareKitMode ? 0 : walk("process/context", (rel) => rel.endsWith(".md")).length,
   checkedConcreteRefs: concreteRefs.length,
   checkedSkills,
   checkedClaudeAgents: claudeAgents.length,

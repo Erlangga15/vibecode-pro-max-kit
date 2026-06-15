@@ -2,10 +2,10 @@
 name: vc-context-discovery
 description: "Discover and load all relevant context for the current task. Lists feature group nested files with full paths, loads process/context/ files by domain routing. Called at the start of every agent session."
 argument-hint: "[task domain or feature name]"
-trigger_keywords: context discovery, load context, feature folder files, context routing
+trigger_keywords: context discovery, load context, feature folder files, context routing discovery
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.1.0"
 ---
 

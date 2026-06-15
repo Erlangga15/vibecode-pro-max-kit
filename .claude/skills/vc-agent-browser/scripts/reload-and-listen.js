@@ -4,7 +4,7 @@
  * for a fixed window. Used to verify reconciliation diagnostic instrumentation.
  *
  * Usage:
- *   node reload-and-listen.js --duration 8000 --target-url "linkedin-brand/chat" \
+ *   node reload-and-listen.js --duration 8000 --target-url "your-app/chat" \
  *     [--no-reload]
  */
 import puppeteer from "puppeteer";

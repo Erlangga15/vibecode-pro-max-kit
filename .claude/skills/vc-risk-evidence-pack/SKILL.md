@@ -5,7 +5,7 @@ argument-hint: "[risk class and work description]"
 trigger_keywords: risk evidence, high-risk pack, evidence pack, risk gate, adversarial validation
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

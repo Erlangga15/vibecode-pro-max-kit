@@ -1,5 +1,11 @@
 # CLAUDE.md
 
+## Bootstrap Guard
+
+**If `process/context/all-context.md` does not exist**, the harness has not been set up yet. (Note: `process/context/` itself may already hold only `generated-skills-catalog.json` from install — that alone does NOT count as set up.) Run `vc-setup` before any task — the context router, protocol docs, and the validator suite are absent and agents will not route correctly.
+
+---
+
 ## Before Any Substantial Task
 
 Always run:
@@ -129,7 +135,7 @@ validate, review, and update-process all run on sonnet.
 
 - The orchestrator MUST name the model when spawning and when recommending a strategy.
 - In RIPER-5 terms: **EXECUTE = opus; every other phase = sonnet.** This matches the live agent
-  frontmatter (`vc-execute-agent` and `vc-fast-mode-agent` are opus; all other vc-agents sonnet).
+  frontmatter (`vc-execute-agent`, `vc-fast-mode-agent`, and `vc-quick-fix-agent` are opus; all other vc-agents sonnet).
 - In a fan-out, only the implementing subagent/teammate/workflow-stage is opus; all reviewers,
   researchers, validators, and planners are sonnet.
 - Full rules: `.claude/skills/vc-agent-strategy-compare/SKILL.md` §Model Selection Policy.
@@ -321,7 +327,7 @@ Full prompts, invoked-skill lists, and tool grants live in each agent's `.claude
 
 > **Tier-1 REQUIRED audits in UPDATE PROCESS (C4):** `vc-audit-vc`, `vc-audit-context`, and `vc-audit-plans` are not merely on-demand tools — they are Tier-1 REQUIRED gates the UPDATE PROCESS phase MUST run per change type (harness/agent edits → `vc-audit-vc`; context-doc edits → `vc-audit-context`; plan/program edits → `vc-audit-plans`). See `process/development-protocols/vc-system-behavior/12-reference.md`.
 
-> **Validator registry:** the 13 VC-system behavior validators (9 D1 + 4 D2, each with a pass/fail fixture pair) are registered in `process/context/all-context.md` §Testing-and-Quality. Run the change-type-relevant validator before closing a phase.
+> **Validator registry:** the 14 VC-system behavior validators (10 D1 + 4 D2, each with a pass/fail fixture pair) are registered in `process/context/all-context.md` (see the validator registry section added by vc-setup). Run the change-type-relevant validator before closing a phase.
 
 ---
 

@@ -122,7 +122,7 @@ E isso. A skill de setup detecta sua stack, pergunta sobre seu projeto (uma conv
 ```
 your-project/
 ├── .claude/
-│   ├── agents/              # 🤖 12 definicoes de agentes especializados
+│   ├── agents/              # 🤖 15 definicoes de agentes especializados
 │   │   ├── vc-research-agent.md
 │   │   ├── vc-execute-agent.md
 │   │   └── ...
@@ -131,7 +131,7 @@ your-project/
 │   │   ├── vc-security/
 │   │   ├── vc-scout/
 │   │   └── ...
-│   └── hooks/               # 🪝 7 hooks de ciclo de vida
+│   └── hooks/               # 🪝 10 hooks de ciclo de vida
 │       ├── privacy-block.cjs
 │       ├── scout-block.cjs
 │       └── ...
@@ -443,13 +443,13 @@ Ele pesquisa seu codigo de auth atual e como outros codebases resolveram RBAC, e
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🪝</h1>
-<h3>7</h3>
+<h3>10</h3>
 <strong>Hooks de Ciclo de Vida</strong><br>
 <sub>Guardrails pre/pos execucao e injecao de contexto</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>📜</h1>
-<h3>6</h3>
+<h3>8</h3>
 <strong>Protocolos de Desenvolvimento</strong><br>
 <sub>Regras de workflow compartilhadas entre todas as ferramentas</sub>
 </td>
@@ -471,9 +471,9 @@ Ele pesquisa seu codigo de auth atual e como outros codebases resolveram RBAC, e
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🌍</h1>
-<h3>6</h3>
+<h3>10</h3>
 <strong>Idiomas</strong><br>
-<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Portugues</sub>
+<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Português · Español · Deutsch · Français · हिन्दी</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>⚡</h1>
@@ -570,7 +570,7 @@ Cada feature completada alimenta aprendizados de volta no sistema de contexto.
 | Suporte multi-ferramenta | 7 ferramentas via AGENTS.md + nativo | Plugin Claude Code | 14 runtimes | 1 ferramenta |
 | Contexto que se auto-aprimora | Context groups roteados por dominio, atualiza apos cada feature | Memoria de plugin | Estado persistido em disco | Manual |
 | Colaboracao em time | Specs, planos e artefatos de revisao compartilhados | Solo | Solo | Solo |
-| Sistema de skills | 32 auto-descobertas, match por keyword em cada prompt | 86 skills composiveis | Meta-prompting | 23 role tools |
+| Sistema de skills | 33 auto-descobertas, match por keyword em cada prompt | 86 skills composiveis | Meta-prompting | 23 role tools |
 | Programas multi-fase | Planos guarda-chuva + loop de execucao por fase com checks de regressao | Tarefa unica | Tarefa unica | Tarefa unica |
 | Pipeline de qualidade | Cadeia de 6 passos (code-review → test → simplify → security → audit → commit) | Qualidade por skill | Sem cadeia automatica | Sem cadeia automatica |
 | Instalacao | Install de 30s via `curl` + auto-setup | Marketplace de plugins | npx one-liner | git clone |
@@ -646,8 +646,10 @@ O orquestrador **nunca faz o trabalho ele mesmo** — ele roteia, monitora e ger
 | Fase | O que acontece | Voce diz |
 |-------|-------------|---------|
 | 🔍 **RESEARCH** | Coleta de fatos somente leitura — codebase + web | *(automatico em feature requests)* |
+| 📝 **SPEC** | Documento de requisitos de descoberta de produto para revisao do usuario | `go` ou `ENTER SPEC MODE` |
 | 💡 **INNOVATE** | Explora 2-3 abordagens com trade-offs | `go` |
 | 📋 **PLAN** | Escreve uma spec detalhada que voce pode revisar | `go` |
+| ✅ **VALIDATE** | Converte o plano em contrato executavel; gates precisam passar | `ENTER VALIDATE MODE` |
 | ⚡ **EXECUTE** | Implementa exatamente o que foi planejado | `ENTER EXECUTE MODE` |
 | 🧠 **UPDATE PROCESS** | Captura aprendizados, atualiza contexto, arquiva plano | *(recomendado apos trabalho nao-trivial)* |
 
@@ -897,8 +899,8 @@ process/
 │   │   └── webhooks_PLAN_28-05-26.md
 │   ├── completed/               # ✅ Planos arquivados (historico pesquisavel)
 │   ├── backlog/                 # 📌 Trabalho adiado
-│   ├── reports/                 # 📄 Relatorios cross-cutting
-│   └── references/              # 📚 Outputs de pesquisa
+│   ├── reports/                 # 📄 (deprecated — artifacts go inside task folders)
+│   └── references/              # 📚 (deprecated — artifacts go inside task folders)
 └── features/
     └── billing/                 # 🏷️ Escopo por feature (5+ artefatos)
         ├── active/
@@ -1025,8 +1027,8 @@ process/features/{feature}/
 ├── active/       # 📋 Planos sendo trabalhados atualmente
 ├── completed/    # ✅ Planos arquivados (historico de decisoes pesquisavel)
 ├── backlog/      # 📌 Trabalho adiado (agentes checam antes de duplicar)
-├── reports/      # 📄 Relatorios de execucao, post-mortems, resultados de validacao
-└── references/   # 📚 Outputs de pesquisa que informam decisoes futuras
+├── reports/      # 📄 (deprecated — artifacts go inside task folders)
+└── references/   # 📚 (deprecated — artifacts go inside task folders)
 ```
 
 <br>
@@ -1044,23 +1046,26 @@ process/features/{feature}/
 
 <br>
 
-### 12 Agentes
+### 15 Agentes
 
 <details>
 <summary>Clique pra expandir a lista de agentes (15 agentes)</summary>
 
 <br>
 
-**Agentes core do workflow** — um por fase RIPER-5:
+**Agentes core do workflow** — um por fase RIPER-5 (R→SPEC→I→P→V→E→UP):
 
 | Agente | Papel |
 |-------|------|
 | 🔍 `vc-research-agent` | Pesquisa de codebase + web, somente leitura. Tracking de contradicoes embutido |
+| 📝 `vc-spec-agent` | Documento de requisitos de descoberta de produto antes do INNOVATE. Produz `*_SPEC_*.md` |
 | 💡 `vc-innovate-agent` | Brainstorm de 2-3 abordagens. Deve produzir resumo de decisao antes do PLAN |
 | 📋 `vc-plan-agent` | Escreve spec com guards anti-racionalizacao. "Eu ja sei como" nao e um plano |
+| ✅ `vc-validate-agent` | Converte plano em contrato executavel (gates V1–V7). Gate: PASS/CONDITIONAL/BLOCKED |
 | ⚡ `vc-execute-agent` | Implementa conforme plano. Check-in de 50%, protocolo de desvio, self-review |
 | ⏩ `vc-fast-mode-agent` | RESEARCH→INNOVATE→PLAN comprimido com pausa de seguranca obrigatoria |
 | 🧠 `vc-update-process-agent` | Checklist obrigatorio de 7 fases incluindo scan de artefatos obsoletos |
+| 🔧 `vc-quick-fix-agent` | QUICK FIX lane: uma edicao pequena de baixo risco + verificacao com escopo, sem plan/validate |
 
 <br>
 
@@ -1079,31 +1084,31 @@ process/features/{feature}/
 
 <br>
 
-### 31 Skills (auto-descobertas)
+### 33 Skills (auto-descobertas)
 
 <details>
 <summary>Clique pra expandir a lista de skills (33 skills)</summary>
 
 <br>
 
-**🔧 Skills de contrato** — `vc-generate-plan` · `vc-generate-context` · `vc-audit-context` · `vc-audit-plans` · `vc-audit-vc` · `vc-setup` · `vc-update` · `vc-publish`
+**🔧 Skills de contrato** — `vc-generate-plan` · `vc-generate-context` · `vc-generate-spec` · `vc-generate-closeout` · `vc-generate-phase-program` · `vc-audit-context` · `vc-audit-plans` · `vc-audit-vc` · `vc-setup` · `vc-update` · `vc-publish`
 
-**🧠 Planejamento** — `vc-predict` (debate com 5 personas) · `vc-scenario` (edge cases em 12 dimensoes) · `vc-sequential-thinking` · `vc-problem-solving`
+**🧠 Planejamento & validacao** — `vc-predict` (debate com 5 personas) · `vc-scenario` (edge cases em 12 dimensoes) · `vc-sequential-thinking` · `vc-problem-solving` · `vc-feasibility-test` (sondagens empiricas) · `vc-risk-evidence-pack` · `vc-test-coverage-plan` · `vc-validate-findings` · `vc-agent-strategy-compare` · `vc-intent-clarify` · `vc-plan-discovery` · `vc-review-situation`
 
 **🐛 Debug & seguranca** — `vc-debug` · `vc-security` (STRIDE + OWASP + auto-fix) · `vc-autoresearch` (otimizacao autonoma)
 
-**📚 Pesquisa** — `vc-docs-seeker` · `vc-scout`)
+**📚 Pesquisa** — `vc-docs-seeker` · `vc-scout`
 
-**🎨 Frontend** — `vc-frontend-design`· `vc-agent-browser` · `vc-web-testing`
+**🎨 Frontend** — `vc-frontend-design` · `vc-agent-browser` · `vc-web-testing`
 
-**⚙️ Utilitarios** —))
+**⚙️ Automacao** — `vc-autopilot` (execucoes autonomas RIPER-5) · `vc-context-discovery`
 
 </details>
 
 
 <br>
 
-### 🪝 7 Hooks
+### 🪝 10 Hooks
 
 | Hook | O que faz |
 |------|-------------|
@@ -1114,6 +1119,9 @@ process/features/{feature}/
 | ✨ **Edit quality** | Apos 5+ edicoes, sugere rodar code-simplifier (nao-bloqueante, com throttle) |
 | 📛 **Descriptive naming** | Convencoes de nomenclatura de arquivos language-aware em cada Write |
 | 📊 **Usage tracking** | Metricas de sessao e awareness de tokens |
+| 📋 **Plan structure check** (`post-write-plan-check.mjs`) | Valida a estrutura do artefato de plano em cada Write para um arquivo `*_PLAN_*.md` |
+| 🧹 **Commit message lint** (`post-commit-lint.mjs`) | Verifica o prefixo conventional-commits em cada chamada `git commit` via Bash |
+| 🔍 **Stop validator sweep** (`stop-validator-sweep.cjs`) | Executa os validators principais do harness quando a sessao do agente encerra |
 
 <br>
 
@@ -1122,9 +1130,9 @@ process/features/{feature}/
 ```
 your-project/
 ├── .claude/
-│   ├── agents/              # 🤖 12 definicoes de agentes (.md)
-│   ├── skills/              # ⚡ 31 modulos de skills (cada um e um diretorio com SKILL.md)
-│   └── hooks/               # 🪝 7 hooks de ciclo de vida (.cjs)
+│   ├── agents/              # 🤖 15 definicoes de agentes (.md)
+│   ├── skills/              # ⚡ 33 modulos de skills (cada um e um diretorio com SKILL.md)
+│   └── hooks/               # 🪝 10 hooks de ciclo de vida (.cjs and .mjs)
 ├── .codex/
 │   └── agents/              # 🔄 Espelhados para compatibilidade com Codex
 ├── .agents/

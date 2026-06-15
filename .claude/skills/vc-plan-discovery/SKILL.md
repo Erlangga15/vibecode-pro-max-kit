@@ -5,7 +5,7 @@ argument-hint: "[feature folder name or task description]"
 trigger_keywords: related plans, what was tried, plan history, feature backlog, plan discovery
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.1.0"
 ---
 

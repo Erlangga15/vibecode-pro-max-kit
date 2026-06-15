@@ -14,7 +14,7 @@
 <div align="center">
 
 <a href="https://flowser.ai">
-  <img src="assets/flowser-logo.svg" alt="Flowser" width="120">
+  <img src="../../assets/flowser-logo.svg" alt="Flowser" width="120">
 </a>
 
 *विश्वस्तरीय इंजीनियरों द्वारा निर्मित, vibecoders के लिए*<br>
@@ -122,16 +122,16 @@ Run vc-setup
 ```
 your-project/
 ├── .claude/
-│   ├── agents/              # 🤖 12 specialized agent definitions
+│   ├── agents/              # 🤖 15 specialized agent definitions
 │   │   ├── vc-research-agent.md
 │   │   ├── vc-execute-agent.md
 │   │   └── ...
-│   ├── skills/              # ⚡ 31 auto-discovered skills
+│   ├── skills/              # ⚡ 33 auto-discovered skills
 │   │   ├── vc-generate-plan/
 │   │   ├── vc-security/
 │   │   ├── vc-scout/
 │   │   └── ...
-│   └── hooks/               # 🪝 7 lifecycle hooks
+│   └── hooks/               # 🪝 10 lifecycle hooks
 │       ├── privacy-block.cjs
 │       ├── scout-block.cjs
 │       └── ...
@@ -275,7 +275,7 @@ Agent यह research करने की बजाय कि दूसरे co
 
 ## 🛠️ समाधान
 
-यह harness आपके project में एक पूरा development system install करता है — सिर्फ एक CLAUDE.md file नहीं, बल्कि **12 specialized agents, 33 skills**, और एक phase-locked workflow जो आपके agent को **build करने से पहले समझने** पर मजबूर करता है।
+यह harness आपके project में एक पूरा development system install करता है — सिर्फ एक CLAUDE.md file नहीं, बल्कि **15 specialized agents, 33 skills**, और एक phase-locked workflow जो आपके agent को **build करने से पहले समझने** पर मजबूर करता है।
 
 <br>
 
@@ -445,13 +445,13 @@ Design-aware agent आपका mockup analyze करता है, आपके
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🪝</h1>
-<h3>7</h3>
+<h3>10</h3>
 <strong>Lifecycle Hooks</strong><br>
 <sub>Pre/post execution guardrails और context injection</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>📜</h1>
-<h3>6</h3>
+<h3>8</h3>
 <strong>Development Protocols</strong><br>
 <sub>सभी tools पर shared workflow rules</sub>
 </td>
@@ -473,9 +473,9 @@ Design-aware agent आपका mockup analyze करता है, आपके
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🌍</h1>
-<h3>6</h3>
+<h3>10</h3>
 <strong>भाषाएं</strong><br>
-<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Português</sub>
+<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Português · Español · Deutsch · Français · हिन्दी</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>⚡</h1>
@@ -572,7 +572,7 @@ process/context/
 | Multi-tool support | 7 tools via AGENTS.md + native | Claude Code plugin | 14 runtimes | 1 tool |
 | Auto-improving context | Domain-routed context groups, updates after every feature | Plugin memory | Disk-persisted state | Manual |
 | Team collaboration | Shared specs, plans, and review artifacts | Solo | Solo | Solo |
-| Skills system | 32 auto-discovered, keyword-matched at every prompt | 86 composable skills | Meta-prompting | 23 role tools |
+| Skills system | 33 auto-discovered, keyword-matched at every prompt | 86 composable skills | Meta-prompting | 23 role tools |
 | Multi-phase programs | Umbrella plans + phase-by-phase execution loop with regression checks | Single task | Single task | Single task |
 | Quality pipeline | 6-step chain (code-review → test → simplify → security → audit → commit) | Per-skill quality | No auto-chain | No auto-chain |
 | Installation | 30-second `curl` install + auto-setup | Plugin marketplace | npx one-liner | git clone |
@@ -648,8 +648,10 @@ Orchestrator **खुद कभी काम नहीं करता** — य
 | Phase | क्या होता है | आप कहते हैं |
 |-------|-------------|---------|
 | 🔍 **RESEARCH** | Read-only fact gathering — codebase + web | *(feature requests पर automatic)* |
+| 📝 **SPEC** | उपयोगकर्ता समीक्षा के लिए product-discovery requirements दस्तावेज़ | `go` या `ENTER SPEC MODE` |
 | 💡 **INNOVATE** | Trade-offs के साथ 2-3 approaches explore करना | `go` |
 | 📋 **PLAN** | एक detailed spec लिखना जिसे आप review कर सकें | `go` |
+| ✅ **VALIDATE** | Plan को executable contract में बदलना; gates pass होने चाहिए | `ENTER VALIDATE MODE` |
 | ⚡ **EXECUTE** | बिल्कुल plan के अनुसार implement करना | `ENTER EXECUTE MODE` |
 | 🧠 **UPDATE PROCESS** | Learnings capture करना, context update करना, plan archive करना | *(non-trivial काम के बाद recommended)* |
 
@@ -899,8 +901,8 @@ process/
 │   │   └── webhooks_PLAN_28-05-26.md
 │   ├── completed/               # ✅ Archived plans (searchable history)
 │   ├── backlog/                 # 📌 Deferred काम
-│   ├── reports/                 # 📄 Cross-cutting reports
-│   └── references/              # 📚 Research outputs
+│   ├── reports/                 # 📄 (deprecated — artifacts go inside task folders)
+│   └── references/              # 📚 (deprecated — artifacts go inside task folders)
 └── features/
     └── billing/                 # 🏷️ Feature-scoped (5+ artifacts)
         ├── active/
@@ -1027,8 +1029,8 @@ process/features/{feature}/
 ├── active/       # 📋 Plans जिन पर अभी काम चल रहा है
 ├── completed/    # ✅ Archived plans (searchable decision history)
 ├── backlog/      # 📌 Deferred काम (agents duplicate बनाने से पहले check करते हैं)
-├── reports/      # 📄 Execution reports, post-mortems, validation results
-└── references/   # 📚 Research outputs जो future decisions inform करते हैं
+├── reports/      # 📄 (deprecated — artifacts go inside task folders)
+└── references/   # 📚 (deprecated — artifacts go inside task folders)
 ```
 
 <br>
@@ -1046,23 +1048,26 @@ process/features/{feature}/
 
 <br>
 
-### 12 Agents
+### 15 Agents
 
 <details>
 <summary>Agent list देखने के लिए click करें (15 agents)</summary>
 
 <br>
 
-**Core workflow agents** — हर RIPER-5 phase के लिए एक:
+**Core workflow agents** — हर RIPER-5 phase के लिए एक (R→SPEC→I→P→V→E→UP):
 
 | Agent | भूमिका |
 |-------|------|
 | 🔍 `vc-research-agent` | Codebase + web research, read-only। Contradiction tracking built in |
+| 📝 `vc-spec-agent` | INNOVATE से पहले product-discovery requirements दस्तावेज़। `*_SPEC_*.md` produce करता है |
 | 💡 `vc-innovate-agent` | 2-3 approaches brainstorm करें। PLAN से पहले decision summary produce करनी होगी |
 | 📋 `vc-plan-agent` | Anti-rationalization guards के साथ spec लिखें। "मुझे पहले से पता है" कोई plan नहीं है |
+| ✅ `vc-validate-agent` | Plan को executable contract में बदलें (V1–V7 gates)। Gate: PASS/CONDITIONAL/BLOCKED |
 | ⚡ `vc-execute-agent` | Plan के अनुसार implement करें। 50% check-in, deviation protocol, self-review |
 | ⏩ `vc-fast-mode-agent` | Mandatory safety pause के साथ compressed RESEARCH→INNOVATE→PLAN |
 | 🧠 `vc-update-process-agent` | Stale artifact scanning सहित 7-phase mandatory checklist |
+| 🔧 `vc-quick-fix-agent` | QUICK FIX lane: एक छोटा कम-जोखिम वाला बदलाव + scoped check, कोई plan/validate नहीं |
 
 <br>
 
@@ -1081,31 +1086,31 @@ process/features/{feature}/
 
 <br>
 
-### 31 Skills (auto-discovered)
+### 33 Skills (auto-discovered)
 
 <details>
 <summary>Skill list देखने के लिए click करें (33 skills)</summary>
 
 <br>
 
-**🔧 Contract skills** — `vc-generate-plan` · `vc-generate-context` · `vc-audit-context` · `vc-audit-plans` · `vc-audit-vc` · `vc-setup` · `vc-update` · `vc-publish`
+**🔧 Contract skills** — `vc-generate-plan` · `vc-generate-context` · `vc-generate-spec` · `vc-generate-closeout` · `vc-generate-phase-program` · `vc-audit-context` · `vc-audit-plans` · `vc-audit-vc` · `vc-setup` · `vc-update` · `vc-publish`
 
-**🧠 Planning** — `vc-predict` (5-persona debate) · `vc-scenario` (12-dimension edge cases) · `vc-sequential-thinking` · `vc-problem-solving`
+**🧠 Planning & validation** — `vc-predict` (5-persona debate) · `vc-scenario` (12-dimension edge cases) · `vc-sequential-thinking` · `vc-problem-solving` · `vc-feasibility-test` (empirical probes) · `vc-risk-evidence-pack` · `vc-test-coverage-plan` · `vc-validate-findings` · `vc-agent-strategy-compare` · `vc-intent-clarify` · `vc-plan-discovery` · `vc-review-situation`
 
 **🐛 Debug & security** — `vc-debug` · `vc-security` (STRIDE + OWASP + auto-fix) · `vc-autoresearch` (autonomous optimization)
 
-**📚 Research** — `vc-docs-seeker` · `vc-scout`)
+**📚 Research** — `vc-docs-seeker` · `vc-scout`
 
-**🎨 Frontend** — `vc-frontend-design`· `vc-agent-browser` · `vc-web-testing`
+**🎨 Frontend** — `vc-frontend-design` · `vc-agent-browser` · `vc-web-testing`
 
-**⚙️ Utilities** —))
+**⚙️ Automation** — `vc-autopilot` (autonomous RIPER-5 runs) · `vc-context-discovery`
 
 </details>
 
 
 <br>
 
-### 🪝 7 Hooks
+### 🪝 10 Hooks
 
 | Hook | क्या करता है |
 |------|-------------|
@@ -1116,6 +1121,9 @@ process/features/{feature}/
 | ✨ **Edit quality** | 5+ edits के बाद, code-simplifier run करने का सुझाव देता है (non-blocking, throttled) |
 | 📛 **Descriptive naming** | हर Write पर language-aware file naming conventions |
 | 📊 **Usage tracking** | Session metrics और token awareness |
+| 📋 **Plan structure check** (`post-write-plan-check.mjs`) | हर `*_PLAN_*.md` file में Write पर plan artifact structure validate करता है |
+| 🧹 **Commit message lint** (`post-commit-lint.mjs`) | हर `git commit` Bash call पर conventional-commits prefix check करता है |
+| 🔍 **Stop validator sweep** (`stop-validator-sweep.cjs`) | Agent session बंद होने पर core harness validators चलाता है |
 
 <br>
 
@@ -1126,7 +1134,7 @@ your-project/
 ├── .claude/
 │   ├── agents/              # 🤖 15 agent definitions (.md)
 │   ├── skills/              # ⚡ 33 skill modules (हर एक SKILL.md के साथ directory)
-│   └── hooks/               # 🪝 7 lifecycle hooks (.cjs)
+│   └── hooks/               # 🪝 10 lifecycle hooks (.cjs and .mjs)
 ├── .codex/
 │   └── agents/              # 🔄 Codex compatibility के लिए mirrored
 ├── .agents/
@@ -1156,7 +1164,7 @@ Run vc-update
 
 ## योगदान
 
-हम contributions का स्वागत करते हैं! Guidelines के लिए [CONTRIBUTING.md](CONTRIBUTING.md) देखें।
+हम contributions का स्वागत करते हैं! Guidelines के लिए [CONTRIBUTING.md](../../CONTRIBUTING.md) देखें।
 
 <br>
 

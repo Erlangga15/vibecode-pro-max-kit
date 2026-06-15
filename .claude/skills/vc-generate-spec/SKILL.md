@@ -5,7 +5,7 @@ argument-hint: "[feature idea or task slug]"
 trigger_keywords: spec, requirements doc, product discovery, what and why, requirements artifact
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

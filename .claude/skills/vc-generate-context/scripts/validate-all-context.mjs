@@ -25,10 +25,17 @@ function read(relPath) {
 }
 
 const contextFile = "process/context/all-context.md";
-const routerFile = "process/context/all-context.md";
 
-if (!exists(contextFile)) fail(`${contextFile} missing`);
-if (!exists(routerFile)) fail(`${routerFile} missing`);
+// Bare-kit mode: process/context/all-context.md is intentionally absent in a freshly
+// cloned kit template. All checks in this validator require a populated context file,
+// so skip them entirely and exit 0 with a clear notice.
+if (!exists(contextFile)) {
+  process.stderr.write(
+    "[bare-kit mode] process/context/all-context.md absent — skipping per-project context-doc checks (kit template not yet set up).\n",
+  );
+  console.log(JSON.stringify({ checkedFile: contextFile, lineCount: 0, strict, warnings: [], failures: [] }, null, 2));
+  process.exit(0);
+}
 
 let lineCount = 0;
 if (exists(contextFile)) {

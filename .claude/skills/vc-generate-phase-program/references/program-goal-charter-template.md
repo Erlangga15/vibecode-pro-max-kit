@@ -1,10 +1,13 @@
 ---
-name: reference:program-goal-charter-template
-description: "Program Goal Charter Template"
-date: 04-06-26
+name: protocol:program-goal-charter-template
+description: "Blank and filled Program Goal Charter template for phase-program umbrella plans. Defines the north-star, definition of done, scope tiers, and hard safety constraints for autonomous multi-phase sessions."
+date: 15-06-26
 metadata:
-  node_type: memory
-  type: reference
+  node_type: reference
+  type: protocol
+  read_order: 10
+  required: false
+  read_when: "building a phase-program umbrella plan or needing the compressed session-goal block format"
 ---
 # Program Goal Charter Template
 
@@ -27,8 +30,7 @@ safety constraints on every run.
 
 ## What the charter is NOT for
 
-Do NOT re-paste execution discipline into the charter. The required 7-step inner loop
-`R → I → P → PVL → E → EVL → UP` (which SKIPS SPEC),
+Do NOT re-paste execution discipline into the charter. The required 10-step per-phase loop,
 re-research at phase entry, regression checkpoints, and honest phase status are already defined in
 `process/development-protocols/phase-programs.md`. The charter references that protocol; it does not
 duplicate it. Keep the charter to program-specific intent and safety only.
@@ -72,32 +74,32 @@ for the full detail rather than inlining everything.
 
 ```text
 SESSION GOAL: [PROGRAM NAME]
-Charter + umbrella plan: process/features/{feature}/active/{program-slug}-umbrella_{date}/{program-slug}-umbrella_PLAN_{date}.md
+Charter + umbrella plan: process/features/{feature}/active/{umbrella-plan}.md
 Autonomy: Run autonomously under this persistent goal. Execute phases on your own
-recommendation via the 7-step inner loop `R → I → P → PVL → E → EVL → UP` in phase-programs.md
-(the inner loop SKIPS SPEC); report conflicts, errors, and learnings in the phase report (the
-report is the communication channel, not a question). Only pause for outward-facing /
-irreversible / costful / destructive actions (see feedback_autonomous_phase_execution.md).
+recommendation via the 10-step loop in phase-programs.md; report conflicts, errors, and
+learnings in the phase report (the report is the communication channel, not a question).
+Only pause for outward-facing / irreversible / costful / destructive actions
+(see feedback_autonomous_phase_execution.md).
 Hard stop conditions / safety constraints:
 - [hard safety constraint 1 from the charter]
 - [hard safety constraint 2 from the charter]
-Next phase: process/features/{feature}/active/{program-slug}_{date}/{phase-slug}_PLAN_{date}.md
+Next phase: process/features/{feature}/active/{next-phase-plan}.md
 ```
 
 ## Filled-In Reference Example
 
-Real charter from the duma.so "Full Product E2E" program. Note: execution-discipline prose is
+Real charter from the example-co.app "Full Product E2E" program. Note: execution-discipline prose is
 intentionally absent — it lives in `process/development-protocols/phase-programs.md`.
 
-The charter example below and the session-goal example further down both use duma.so as the
+The charter example below and the session-goal example further down both use example-co.app as the
 sample program; they illustrate different aspects (charter structure vs compressed launch block)
 and are not the same program instance.
 
 ```text
-# Full Product E2E (duma.so) — Program Goal Charter
+# Full Product E2E (example-co.app) — Program Goal Charter
 
 North star:
-- Make duma.so's full-product E2E system reliable enough that a future agent can autonomously
+- Make example-co.app's full-product E2E system reliable enough that a future agent can autonomously
   implement a feature, write/extend its tests, run them headlessly with complete evidence, diagnose
   and self-heal failures in a bounded loop, run highest-risk slices against production-fidelity
   targets, clean up all state safely, and hand off only after behavior is genuinely verified —
@@ -153,7 +155,7 @@ Hard safety constraints (non-negotiable, per phase):
 
 ### Filled-In Session-Goal Block (example)
 
-A compressed launch packet for the duma.so "Full Product E2E" program. This is the autonomous
+A compressed launch packet for the example-co.app "Full Product E2E" program. This is the autonomous
 session-goal variant: per-phase approval is standing-granted, and irreversible/costful actions are
 deferred-and-reported rather than executed or paused-on (see
 `process/development-protocols/phase-programs.md`, "Autonomous Session-Goal Variant"). It stays under
@@ -191,7 +193,7 @@ E2E-owned disposable targets. NEVER wipe named volumes, mutate prod data/storage
 images/deploy, or run live/costful gates without per-lane approval — defer-and-report those. Keep
 process/plan commits separate from execution commits; commit each phase before moving on.
 
-Discipline: fully autonomous — proceed phase-to-phase via the 7-step inner loop `R → I → P → PVL → E → EVL → UP` WITHOUT pausing for
+Discipline: fully autonomous — proceed phase-to-phase via the 10-step loop WITHOUT pausing for
 approval. Self-decide; if something breaks, diagnose, write a new plan/fix, and continue. Done when
 T1–3 are ✅ VERIFIED and T4 documented as deferred.
 ```

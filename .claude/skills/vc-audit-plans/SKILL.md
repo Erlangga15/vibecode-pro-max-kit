@@ -4,7 +4,7 @@ description: Audit active project plan files for staleness, completion, and rout
 trigger_keywords: audit plans, plan inventory, stale plans, active plan count
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

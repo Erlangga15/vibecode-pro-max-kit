@@ -58,7 +58,7 @@ All notable changes to vibecode-pro-max-kit are documented in this file.
 
 - All 15 agents and 33 skills updated to latest vc-system-behavior spec
 - RIPER-5 flow extended: R→SPEC→I→P→V→E→UP (SPEC and VALIDATE are now full phases with dedicated agents)
-- README.md: full rewrite with correct counts (15 agents, 33 skills, 9 protocol root files) and new selling points
+- README.md: full rewrite with correct counts (15 agents, 33 skills, 8 non-router protocol root files, 10 hooks) and new selling points
 - All 9 i18n README files updated with correct counts and new features
 - vc-setup: added catalog generate-on-install safety check
 - vc-publish: added skip-bump branch for "already at target version" case

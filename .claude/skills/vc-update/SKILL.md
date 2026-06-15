@@ -41,9 +41,16 @@ Read the file `.vc-version` in the project root.
 ### Step 3: Clone Remote Repository
 
 ```bash
-TMPDIR="/tmp/vc-update-$(date +%s)"
-git clone --depth 1 https://github.com/withkynam/vibecode-pro-max-kit.git "$TMPDIR"
+# Respect VC_KIT_SOURCE override (local path or alternate URL).
+# When unset, defaults to the official remote.
+KIT_SOURCE="${VC_KIT_SOURCE:-https://github.com/withkynam/vibecode-pro-max-kit.git}"
+VC_UPDATE_TMPDIR="/tmp/vc-update-$(date +%s)"
+git clone --local --depth 1 --quiet "$KIT_SOURCE" "$VC_UPDATE_TMPDIR" 2>/dev/null \
+  || git clone --depth 1 --quiet "$KIT_SOURCE" "$VC_UPDATE_TMPDIR"
+# Note: --local is a no-op for remote URLs (git ignores it); the fallback covers all cases.
 ```
+
+> `VC_KIT_SOURCE` — if set, use this path or URL instead of the official remote. Accepts any value accepted by `git clone`. This enables offline testing (`VC_KIT_SOURCE=/path/to/local/kit`) and forks/pinned versions.
 
 If the clone fails (network error, auth error, repo not found):
 - Print the error message.
@@ -55,7 +62,7 @@ If the clone fails (network error, auth error, repo not found):
 Run the resolver script from the cloned repo:
 
 ```bash
-node "$TMPDIR/resolve-manifest.mjs" --root "$TMPDIR" --json
+node "$VC_UPDATE_TMPDIR/resolve-manifest.mjs" --root "$VC_UPDATE_TMPDIR" --json
 ```
 
 Parse the JSON output to extract:
@@ -68,8 +75,10 @@ Parse the JSON output to extract:
 
 Extract the remote version from the manifest:
 ```bash
-node -e "console.log(JSON.parse(require('fs').readFileSync('$TMPDIR/vc-manifest.json','utf8')).version)"
+node -e "console.log(JSON.parse(require('fs').readFileSync('$VC_UPDATE_TMPDIR/vc-manifest.json','utf8')).version)"
 ```
+
+**Retain Step 4 output through Step 7:** Keep the full resolver JSON (especially `symlinks`) in memory. `compute-sync-plan.mjs --json` (Steps 6/10) does not re-emit `symlinks`, so Step 7 depends on the Step 4 value.
 
 **Legacy fallback:** If `resolve-manifest.mjs` does not exist in the remote (very old kit version), fall back to reading `vc-manifest.json` directly and using the old `managed`/`managedDirs`/`seedsDir` fields for file resolution.
 
@@ -79,28 +88,34 @@ Compare the remote manifest `version` against `currentVersion`.
 
 - If they are equal: report **"Already up to date (vX.Y.Z)"** and clean up `$TMPDIR`. **Stop.**
 - If remote is newer (or currentVersion is `0.0.0`): continue to diff.
+- If remote is **older** than `currentVersion`: print `⚠ WARNING: downgrade v{remoteVersion} → v{currentVersion} detected. The source kit is older than your installed version. Continuing will overwrite newer harness files with older ones.` then ask for explicit confirmation before continuing. If the user does not confirm, clean up `$VC_UPDATE_TMPDIR` and stop.
 
 ### Step 6: Read Local Snapshot and Compute Diff
 
-**Read `.vc-installed-files`** from the project root (if it exists). This file contains one file path per line -- the list of files installed by the last update.
+**Computation via `compute-sync-plan.mjs`:** Once the remote manifest is resolved (Step 4), invoke the shared computation core:
 
-**If `.vc-installed-files` does NOT exist** (first update with new system):
-1. Build a synthetic snapshot by scanning the user project for files that exist AND match the remote `files` list.
-2. Also check for legacy `deletions` from the v2.0.4 era -- the resolver embeds these as `legacyDeletions` in legacy mode. For any path in the legacy deletions list that still exists locally, mark it for deletion.
-3. Write this synthetic snapshot to `.vc-installed-files` for future updates.
+```bash
+node "$VC_UPDATE_TMPDIR/compute-sync-plan.mjs" \
+  --root "$PROJECT_ROOT" \
+  --kit-root "$VC_UPDATE_TMPDIR" \
+  --json
+```
 
-**If `.vc-installed-files` EXISTS** and the remote manifest includes a `legacyDeletions` array (kit v3.0.0+):
-- For any path in `legacyDeletions` that still exists locally, add it to the removals list regardless of snapshot state. This handles paths that were never tracked in the snapshot (e.g. renamed skills, deprecated dirs).
+Parse the JSON output: `{ toAdd, toModify, toDelete, toPreserve, staleWarnings }`.
+- `toAdd` — files to copy from kit to project (not yet present or tracked).
+- `toModify` — files to overwrite (tracked, present, content differs).
+- `toDelete` — stale kit files to remove (in old snapshot, not in new ownedPaths, passed namespace guard).
+- `toPreserve` — files to leave untouched (merge/copyIfMissing survivors, user-owned files).
+- `staleWarnings` — paths that were in snapshot but failed namespace guard — print to user; do NOT delete.
 
-**Compute the diff** using three lists: remote `files`, local snapshot, and local filesystem:
+The manual snapshot-reading and diff logic in the previous version of this step is replaced by this invocation. The prose description of the algorithm is preserved in `references/vc-update.md` for reference.
 
-- **Additions:** Files in remote `files` but NOT in local snapshot (new files to install).
-- **Removals:** Files in local snapshot but NOT in remote `files` (files removed from kit -- should be deleted locally). Also includes `legacyDeletions` entries still present on disk.
-- **Modifications:** Files in both lists -- compare content via `diff` between `$TMPDIR/{path}` and `{projectRoot}/{path}`.
-  - If identical: **unchanged**.
-  - If different: **modified** (note line count changes).
-- **Merge files:** Files in the `merge` list (e.g. `.claude/settings.json`) that have local changes. Preserve local version entirely, show diff, flag for manual review.
-- **Copy-if-missing files:** Files in the `copyIfMissing` list that already exist locally. Show the diff but note they will NOT be overwritten.
+**Fallback — no `.vc-installed-files` (first update with new system):**
+When the snapshot file is absent, `compute-sync-plan.mjs` sets `priorSnapshot = []` (empty — no disk scan). No stale removal occurs via the snapshot path because there are no prior entries to compare against. `legacyDeletions` from the manifest are still applied independently (step 4 in the function) and may delete old paths that exist on disk. `.vc-installed-files` is written only when `--apply` is passed, not during a `--json` dry-run.
+
+**Merge files** (e.g. `.claude/settings.json`): files in the `merge` list that exist locally are placed in `toPreserve` by compute-sync-plan.mjs — they are never overwritten. Show the diff for manual review, flag for manual review.
+
+**Copy-if-missing files:** files in the `copyIfMissing` list that already exist locally are also placed in `toPreserve`. Show the diff but note they will NOT be overwritten.
 
 ### Step 7: Check Symlinks
 
@@ -137,6 +152,16 @@ SYMLINKS:
 Summary: 5 modified, 2 new, 1 removal, 1 merge skipped, 45 unchanged
 ```
 
+**Large-delete WARNING:** After computing the dry-run summary, check `toDelete.length`. If it exceeds 20 files OR exceeds 10% of the prior install file count (line count of `.vc-installed-files`), print the following block prominently before asking for confirmation:
+
+```
+⚠ WARNING: {N} files scheduled for removal — unusually high.
+Verify this is an expected upgrade before applying.
+Do NOT blindly approve when this warning appears.
+```
+
+Do not suppress this warning or fold it into the summary line. It must appear as a standalone block so the user cannot miss it.
+
 ### Step 9: Wait for Confirmation
 
 **STOP HERE.** Tell the user:
@@ -146,47 +171,80 @@ Summary: 5 modified, 2 new, 1 removal, 1 merge skipped, 45 unchanged
 Do NOT proceed until the user explicitly says "apply" (or a clear affirmative like "yes", "go", "do it").
 
 If the user aborts:
-- Remove `$TMPDIR`.
+- Remove `$VC_UPDATE_TMPDIR`.
 - Print "Update cancelled. No changes made."
 - **Stop.**
 
 ### Step 10: Apply Changes
 
-On user confirmation, apply in this order:
+On user confirmation, run in two parts:
 
-1. **Additions and modifications**: For each file in the remote `files` list:
-   - Skip if file is in `merge` list AND exists locally (preserve user version).
-   - Skip if file is in `copyIfMissing` list AND exists locally (preserve user version).
-   - Otherwise: `mkdir -p` the parent directory, copy from `$TMPDIR/{path}` to `{projectRoot}/{path}`.
+**Isolation guarantee (Parts A/B):** `$VC_UPDATE_TMPDIR` is a read-only clone — no changes are made to it between calls. The project root is also not mutated before Part B runs. Both invocations therefore see the same sync plan, so the backup in Part A covers the exact set that Part B will overwrite.
 
-2. **Removals**: For each file in the local snapshot but NOT in the remote `files` list:
-   - Delete the local file.
-   - If the parent directory is now empty, remove it too.
+**Part A — Back up files that will be modified or deleted (toModify + toDelete lists):**
 
-3. **Legacy deletions** (kit v3.0.0+): For each path in `legacyDeletions` that still exists locally:
-   - If it is a directory: `rm -rf {path}`.
-   - If it is a file: delete it.
-   - Clean up empty parent directories by iterating deepest-first: after all individual deletions in this step are done, walk the set of parent paths (deepest subdirectory first) and `rmdir` each that is now empty. This ensures no orphan dirs remain.
+Before applying, back up every file in `toModify` AND every file in `toDelete` so both overwritten content and deleted files are recoverable:
 
-   **Sub-case B (no `.vc-installed-files`):** When the snapshot file is absent (very old install or re-install scenario), the normal removal-by-diff path (step 2) cannot run. To ensure deprecated paths are still removed: apply `legacyDeletions` unconditionally in this case — for each path in `legacyDeletions` that still exists locally on disk, `rm -rf` if directory or `rm` if file, then clean empty parents deepest-first. This sub-case B fallback must run even when `.vc-installed-files` is absent, so that deprecated skill dirs and protocol files left over from a prior install are removed.
+```bash
+node "$VC_UPDATE_TMPDIR/compute-sync-plan.mjs" \
+  --root "$PROJECT_ROOT" \
+  --kit-root "$VC_UPDATE_TMPDIR" \
+  --json | PROJECT_ROOT="$PROJECT_ROOT" node -e "
+    const plan = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+    const fs = require('fs'), path = require('path');
+    const root = process.env.PROJECT_ROOT;
+    for (const rel of [...plan.toModify, ...plan.toDelete]) {
+      const src = path.join(root, rel);
+      if (!fs.existsSync(src)) continue;
+      const dst = path.join(process.env.PROJECT_ROOT, '.vibecode-backup', rel);
+      fs.mkdirSync(path.dirname(dst), { recursive: true });
+      fs.copyFileSync(src, dst);
+    }
+  "
+# Note: this backup step assumes a POSIX shell. On Windows, skip or adapt it — /dev/stdin is unavailable.
+```
 
-4. **Symlinks**: For each entry in `symlinks`:
-   - If a real directory exists at the path: `rm -rf` it first.
-   - If a wrong symlink exists: `rm` it first.
-   - Create the symlink: `ln -s {target} {path}`
+(This preserves the pre-update versions of both overwritten and removed files, so any content is recoverable from `.vibecode-backup/`.)
 
-5. **Write snapshot**: Write the remote `files` list (sorted, one per line) to `.vc-installed-files`.
+**Part B — Apply the full plan with the single mechanical command:**
 
-6. **Write version**: Write the manifest version string to `.vc-version`.
+```bash
+node "$VC_UPDATE_TMPDIR/compute-sync-plan.mjs" \
+  --root "$PROJECT_ROOT" \
+  --kit-root "$VC_UPDATE_TMPDIR" \
+  --resolver "$VC_UPDATE_TMPDIR/resolve-manifest.mjs" \
+  --apply
+```
 
-7. **Clean up**: Remove `$TMPDIR`.
+`--apply` deterministically executes the computed plan:
+- **toAdd / toModify**: `mkdir -p` parent + copy from kit to project. `toPreserve` entries (merge/copyIfMissing survivors) are never touched.
+- **toDelete**: each entry is removed — directories via `rmSync({recursive:true,force:true})`, files via `rmSync({force:true})`.
+- **Empty-parent sweep**: after all deletions, every ancestor directory of every deleted path is walked deepest-first and `rmdirSync`'d if empty. This is the guaranteed cleanup that prevents hollow deprecated skill dirs (e.g. empty `references/`, `scripts/` subdirs) from surviving after a skill is removed.
+- **Snapshot**: writes `.vc-installed-files` (sorted `ownedPaths`, one per line — matches install.sh format).
+- **Version**: writes `.vc-version` (manifest version string).
+- **staleWarnings**: printed to stderr; those paths are never deleted.
 
-If any copy/delete fails with a permission error:
-- Print which file failed and the error.
+Do NOT hand-loop `rm` or `cp` commands — use only the `--apply` invocation above. The mechanical implementation guarantees correct empty-dir cleanup on every run, including directory-shaped deletions and deeply nested deprecated skill subdirs.
+
+**Part C — Symlinks** (handled separately, unchanged):
+
+For each entry in `symlinks`:
+- If a real directory exists at the path: `rm -rf` it first.
+- If a wrong symlink exists: `rm` it first.
+- Create the symlink: `ln -s {target} {path}`
+
+**Part D — Clean up**:
+
+```bash
+rm -rf "$VC_UPDATE_TMPDIR"
+```
+
+If `--apply` exits non-zero (permission error, missing kit file):
+- Print the error message.
 - Suggest running `chmod` on the affected path or checking file ownership.
-- Continue with remaining files (do not abort the entire update).
+- The command exits 1; do not treat a partial run as success.
 
-### Step 11: Print Applied Changes Summary
+### Step 11: Print Applied Changes Summary and Post-Update NOTICE
 
 ```
 vc-update complete: v{currentVersion} -> v{remoteVersion}
@@ -202,8 +260,82 @@ Snapshot written to .vc-installed-files
 Version written to .vc-version: {remoteVersion}
 ```
 
+**After printing the summary, run three post-update checks and print a NOTICE block:**
+
+**Check A — `.agents/skills` symlink vs real directory:**
+
+```bash
+[ -L .agents/skills ] && echo "symlink" || echo "real-dir"
+```
+
+If the result is `real-dir` (Windows fallback — a real directory instead of a symlink), re-sync it now so it stays current with the updated `.claude/skills/`:
+
+```bash
+cp -r .claude/skills/. .agents/skills/
+```
+
+Print: `NOTICE: .agents/skills is a real directory (Windows fallback) — re-synced from .claude/skills/`
+
+If it is a symlink, skip this step (the symlink already resolves to the updated `.claude/skills/`).
+
+**Check B — `.claude/settings.json` merge-preserved hooks gap:**
+
+If `.claude/settings.json` was in `toPreserve` (it was merge-protected), print the following NOTICE block verbatim so the user knows exactly what to add:
+
+```
+NOTICE: .claude/settings.json was preserved (merge-protected). New hooks added in
+this release will NOT fire until you add them manually.
+
+Missing hooks most likely absent from your v2.x install:
+
+  PostToolUse (Write)  → post-write-plan-check.mjs   — validates plan artifact structure on every plan write
+  PostToolUse (Bash)   → post-commit-lint.mjs         — lints commit messages for conventional-commit prefix
+  Stop                 → stop-validator-sweep.cjs      — runs core validators on session end
+  SubagentStart        → subagent-init.cjs             — injects compact context into every subagent
+
+Paste-ready hooks block: see https://github.com/withkynam/vibecode-pro-max-kit/blob/main/MIGRATION.md#action-required-settingsjson-hooks
+or diff .claude/settings.json .vibecode-backup/.claude/settings.json
+```
+
+If `.claude/settings.json` was NOT in `toPreserve` (it was freshly written), skip this notice.
+
+**Check C — old-layout process/ folders:**
+
+Scan for these two signals of pre-v3.0.0 plan layout:
+
+1. Any `*.md` file matching `*_PLAN_*.md` that lives **directly** in `process/general-plans/active/` or `process/features/*/active/` (flat file, not inside a `{slug}_{date}/` subfolder).
+2. Any `reports/` or `references/` directory that is a **sibling** of `active/`/`completed/`/`backlog/` under `process/general-plans/` or `process/features/*/`.
+
+If either signal is found, print:
+
+```
+NOTICE: Old-layout process/ folders detected. v3.0.0 uses task-folder convention
+(active/{slug}_{date}/{slug}_PLAN_{date}.md). Your existing plans still work as
+read-only legacy artifacts, but new plans should use the task-folder layout.
+
+To migrate automatically: run vc-setup (Flow B / Merge mode detects and migrates
+old layouts with your approval before touching anything).
+```
+
+If no old-layout signals are found, print nothing for Check C.
+
+**Recommended: run validators**
+
+After the NOTICE block, print:
+
+```
+Recommended next step — run the five core validators:
+
+  node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
+  node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs
+  node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
+  node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+  node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs
+```
+
 ## Rules
 
+- `VC_KIT_SOURCE`: when set, overrides the remote URL for cloning. Used verbatim as the `git clone` source argument. No validation. Enables local testing and forks.
 - `process/_seeds/` is a legacy optional scaffold surface. If a remote release still includes it, treat it as managed reference and overwrite it entirely on update. Its absence in the live repo is valid.
 - Real working files outside `_seeds/` (`process/context/`, `process/features/`, `process/general-plans/`) are **NEVER** touched by vc-update.
 - Always show the dry-run diff before applying. Never apply without user confirmation.
@@ -216,7 +348,7 @@ Version written to .vc-version: {remoteVersion}
 
 ## Migration from v2.x
 
-Kit v3.0.0 introduces the `legacyDeletions` key in `resolveGlob()`'s JSON output (Step 4 above). Old SKILL.md versions (v2.0.0) already process `legacyDeletions` when it is present in the resolver output (they used it only in legacy/resolveLegacy mode previously). Starting with kit v3.0.0, `legacyDeletions` is also emitted in glob mode — so existing v2.x installs receive it automatically on their next `vc-update` run without any local SKILL.md change required.
+Kit v3.0.0 introduces the `legacyDeletions` key in `resolveGlob()`'s JSON output (Step 4 above). **This note applies to users who are upgrading FROM a kit v2.x install that still has an OLD SKILL.md** (one that predates v3.0.0 and does not reference `compute-sync-plan.mjs`). When such a user runs `vc-update`, the remote resolver already emits `legacyDeletions` in its JSON output. The current SKILL.md (this file, v3.0.0+) reads and applies that field in Step 6 via `compute-sync-plan.mjs`. No local SKILL.md change is required on the user's side — the update process itself installs the new SKILL.md in the same run.
 
 The one-shot migration on next `vc-update` from kit v3.0.0:
 1. Resolver emits `legacyDeletions: [".claude/skills/vc-team", ".claude/skills/vc-chrome-devtools", ...]` in the JSON output.

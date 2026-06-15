@@ -11,8 +11,6 @@
 
 感谢你有兴趣为 vibecode-pro-max-kit 做贡献！这个项目为 Claude Code 和 Codex 提供开箱即用的 agent harness，我们欢迎所有人的贡献。
 
-参与本项目即表示你同意遵守我们的 [行为准则](../../CODE_OF_CONDUCT.md)。
-
 ---
 
 ## 沟通渠道

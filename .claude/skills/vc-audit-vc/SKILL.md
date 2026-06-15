@@ -4,7 +4,7 @@ description: >-
   Audit agent harness health: Claude/Codex agent parity, skill registry
   consistency, README.md sync, and protocol file wiring. Use when agents,
   skills, README.md, or development-protocol files move, split, or drift.
-trigger_keywords: harness, agent parity, skill audit, guide sync
+trigger_keywords: harness audit, agent parity, skill audit, guide sync
 layer: contract
 ---
 

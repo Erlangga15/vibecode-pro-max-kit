@@ -5,7 +5,7 @@ argument-hint: "[program name and goal description]"
 trigger_keywords: phase program, umbrella plan, session goal block, kickoff template, multi-phase
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

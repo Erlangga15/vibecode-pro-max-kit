@@ -57,6 +57,11 @@ Use this folder for durable, repo-specific operating instructions that must stay
   V6/V7 (UPDATE) variant, per-gate autonomous decision policy, hard stops, deactivation rules, and
   phase-program interaction. Complements orchestration.md §Autonomy Mode.
 
+- `references/program-goal-charter-template.md`
+  Blank and filled Program Goal Charter template for phase-program umbrella plans. Read when building
+  an umbrella plan or needing the compressed session-goal block format. Canonical content also mirrored
+  at `.claude/skills/vc-generate-phase-program/references/program-goal-charter-template.md`.
+
 Note: Protocol procedures for intent clarification, parallel strategy scoring, validate fan-out,
 and closeout are now in the corresponding skills. See `process/context/all-context.md` skill
 registry for skill names (`vc-intent-clarify`, `vc-agent-strategy-compare`, `vc-validate-findings`,

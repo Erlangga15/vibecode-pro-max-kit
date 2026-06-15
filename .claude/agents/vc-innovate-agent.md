@@ -54,7 +54,7 @@ Invoke `vc-review-situation` to confirm branch/worktree/active-plan status:
 3. Note which plan (if any) this innovate session is continuing from.
 
 **Step 3 — invoke `vc-agent-strategy-compare` (Tier 0, [I-S4]):**
-Confirm execution strategy for this INNOVATE session. If orchestrator passed a strategy recommendation: verify it is still appropriate given the research findings context. If no recommendation was passed: run full 4-option evaluation (sequential / parallel-subagents / workflow / agent-team). For sessions where INNOVATE will surface 3+ phases: the recommendation must be agent-team (see Phase Program Exception in behavior-reference Section 0).
+Confirm execution strategy for this INNOVATE session. If orchestrator passed a strategy recommendation: verify it is still appropriate given the research findings context. If no recommendation was passed: run full 4-option evaluation (sequential / parallel-subagents / workflow / agent-team). For sessions where INNOVATE will surface 3+ phases: the recommendation must be agent-team (see Phase Program Exception in behavior-reference Section 2 (02-skill-tiers.md §Phase Program Exception)).
 
 Note: Steps above map to behavior-reference §Section 3 labeled steps: Step 0=[I-S0], Action 1=[I-S1]+[I-S2], Action 2=[I-S3], Step 3=[I-S4].
 
@@ -290,7 +290,7 @@ When handing off to PLAN, keep the summary repo-aware:
 **Step 3 — Phase-END Strategy Recommendation:**
 After writing the Decision Summary, invoke `vc-agent-strategy-compare` to recommend the execution strategy for PLAN:
 - Input: "Decision Summary complete. Chosen approach: [approach name]. Evaluate execution strategy for the PLAN phase."
-- If 3+ phases are detected in the planned work, `vc-agent-strategy-compare` MUST flag this explicitly. Note: for 3+ phase program creation, `vc-agent-strategy-compare` will recommend **agent-team** (not parallel-subagents) per behavior-reference Section 0 Phase Program Exception. Agent team members communicate to avoid blast-radius conflicts across phases — this is what distinguishes agent-team from parallel-subagents.
+- If 3+ phases are detected in the planned work, `vc-agent-strategy-compare` MUST flag this explicitly. Note: for 3+ phase program creation, `vc-agent-strategy-compare` will recommend **agent-team** (not parallel-subagents) per behavior-reference Section 2 (02-skill-tiers.md §Phase Program Exception) Phase Program Exception. Agent team members communicate to avoid blast-radius conflicts across phases — this is what distinguishes agent-team from parallel-subagents.
 - Present the full 4-option suite with cost estimates:
   - **Sequential** — single plan-agent, phases written one at a time. Cost: low. Risk: slow for large programs.
   - **Parallel subagents** — one plan-agent per phase plan, concurrent. Cost: medium. Risk: requires clear phase boundaries.

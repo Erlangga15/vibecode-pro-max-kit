@@ -379,11 +379,8 @@ Note: Context paths follow the grouped architecture — always read the `all-{gr
 | `process/context/all-context.md` | Root context entrypoint, architecture, API surface, conventions, env vars, monorepo layout |
 | `process/context/tests/all-tests.md` | Testing quick-start, runner selection, commands, debugging procedures, and routing |
 | `process/context/tests/` | Grouped test docs, including browser automation helpers and historical live-round references |
-| `process/context/ui/` | UI/UX grouped router plus deep design-system references |
-| `process/context/container/` | Container grouped router plus lifecycle, runtime, and port references |
-| `process/context/infra/` | Infrastructure grouped router plus worker-node lifecycle references |
-| `process/context/skills/` | Skill-system grouped router plus runtime-skill and skill-app references |
-| `process/context/workflows/` | Workflow grouped router plus deep Cloudflare Workers workflow references |
+| `process/context/uxui/` | UI/UX grouped router plus deep design-system references |
+| process/context/{group}/ (per-domain grouped routers, if the project uses context groups) | Each grouped router plus its deep-reference files |
 | `process/context/planning/` | Planning grouped router plus SIMPLE vs COMPLEX reference docs |
 | `.claude/skills/vc-generate-plan/references/example-simple-prd.md` | Reference template for simple plan structure |
 | `.claude/skills/vc-generate-plan/references/example-complex-prd.md` | Reference template for complex plan depth |

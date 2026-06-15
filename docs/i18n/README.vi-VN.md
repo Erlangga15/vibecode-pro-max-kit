@@ -131,7 +131,7 @@ your-project/
 │   │   ├── vc-security/
 │   │   ├── vc-scout/
 │   │   └── ...
-│   └── hooks/               # 🪝 7 lifecycle hooks
+│   └── hooks/               # 🪝 10 lifecycle hooks
 │       ├── privacy-block.cjs
 │       ├── scout-block.cjs
 │       └── ...
@@ -443,13 +443,13 @@ Nó research code auth hiện tại và cách các codebase khác giải quyết
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🪝</h1>
-<h3>7</h3>
+<h3>10</h3>
 <strong>Lifecycle Hooks</strong><br>
 <sub>Guardrails trước/sau execution và context injection</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>📜</h1>
-<h3>6</h3>
+<h3>8</h3>
 <strong>Development Protocols</strong><br>
 <sub>Workflow rules chung cho mọi tool</sub>
 </td>
@@ -471,9 +471,9 @@ Nó research code auth hiện tại và cách các codebase khác giải quyết
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🌍</h1>
-<h3>6</h3>
+<h3>10</h3>
 <strong>Ngôn Ngữ</strong><br>
-<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Portugues</sub>
+<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Português · Español · Deutsch · Français · हिन्दी</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>⚡</h1>
@@ -570,7 +570,7 @@ Mỗi feature hoàn thành đều feed learnings ngược lại vào context sys
 | Hỗ trợ nhiều tool | 7 tools qua AGENTS.md + native | Claude Code plugin | 14 runtimes | 1 tool |
 | Auto-improving context | Domain-routed context groups, cập nhật sau mỗi feature | Plugin memory | Disk-persisted state | Thủ công |
 | Team collaboration | Shared specs, plans, và review artifacts | Solo | Solo | Solo |
-| Hệ thống skills | 32 tự động discover, keyword-matched ở mỗi prompt | 86 composable skills | Meta-prompting | 23 role tools |
+| Hệ thống skills | 33 tự động discover, keyword-matched ở mỗi prompt | 86 composable skills | Meta-prompting | 23 role tools |
 | Multi-phase programs | Umbrella plans + vòng lặp phase-by-phase với regression checks | Single task | Single task | Single task |
 | Quality pipeline | Chuỗi 6 bước (code-review → test → simplify → security → audit → commit) | Per-skill quality | Không tự động | Không tự động |
 | Cài đặt | 30 giây `curl` install + auto-setup | Plugin marketplace | npx one-liner | git clone |
@@ -646,8 +646,10 @@ Orchestrator **không bao giờ tự làm việc** — nó route, monitor, và q
 | Phase | Chuyện gì xảy ra | Bạn nói |
 |-------|-------------|---------|
 | 🔍 **RESEARCH** | Fact gathering read-only — codebase + web | *(tự động với feature requests)* |
+| 📝 **SPEC** | Tài liệu yêu cầu product-discovery để user review | `go` hoặc `ENTER SPEC MODE` |
 | 💡 **INNOVATE** | Explore 2-3 approaches với trade-offs | `go` |
 | 📋 **PLAN** | Viết spec chi tiết để bạn review | `go` |
+| ✅ **VALIDATE** | Chuyển plan thành contract có thể thực thi; các gate phải pass | `ENTER VALIDATE MODE` |
 | ⚡ **EXECUTE** | Implement đúng những gì đã plan | `ENTER EXECUTE MODE` |
 | 🧠 **UPDATE PROCESS** | Capture learnings, cập nhật context, archive plan | *(khuyến nghị sau non-trivial work)* |
 
@@ -897,8 +899,8 @@ process/
 │   │   └── webhooks_PLAN_28-05-26.md
 │   ├── completed/               # ✅ Plans đã archive (lịch sử tìm kiếm được)
 │   ├── backlog/                 # 📌 Công việc trì hoãn
-│   ├── reports/                 # 📄 Reports cross-cutting
-│   └── references/              # 📚 Research outputs
+│   ├── reports/                 # 📄 (deprecated — artifacts go inside task folders)
+│   └── references/              # 📚 (deprecated — artifacts go inside task folders)
 └── features/
     └── billing/                 # 🏷️ Feature-scoped (5+ artifacts)
         ├── active/
@@ -1025,8 +1027,8 @@ process/features/{feature}/
 ├── active/       # 📋 Plans đang được làm
 ├── completed/    # ✅ Plans đã archive (lịch sử quyết định tìm kiếm được)
 ├── backlog/      # 📌 Công việc trì hoãn (agents check trước khi tạo duplicate plans)
-├── reports/      # 📄 Execution reports, post-mortems, validation results
-└── references/   # 📚 Research outputs phục vụ quyết định tương lai
+├── reports/      # 📄 (deprecated — artifacts go inside task folders)
+└── references/   # 📚 (deprecated — artifacts go inside task folders)
 ```
 
 <br>
@@ -1044,23 +1046,26 @@ process/features/{feature}/
 
 <br>
 
-### 12 Agents
+### 15 Agents
 
 <details>
 <summary>Click để xem danh sách agents (15 agents)</summary>
 
 <br>
 
-**Core workflow agents** — mỗi agent cho một phase RIPER-5:
+**Core workflow agents** — mỗi agent cho một phase RIPER-5 (R→SPEC→I→P→V→E→UP):
 
 | Agent | Vai trò |
 |-------|------|
 | 🔍 `vc-research-agent` | Codebase + web research, read-only. Có contradiction tracking |
+| 📝 `vc-spec-agent` | Tài liệu yêu cầu product-discovery trước INNOVATE. Tạo ra `*_SPEC_*.md` |
 | 💡 `vc-innovate-agent` | Brainstorm 2-3 approaches. Phải tạo decision summary trước PLAN |
 | 📋 `vc-plan-agent` | Viết spec với anti-rationalization guards. "Tôi đã biết cách" không phải là plan |
+| ✅ `vc-validate-agent` | Chuyển plan thành contract có thể thực thi (gate V1–V7). Gate: PASS/CONDITIONAL/BLOCKED |
 | ⚡ `vc-execute-agent` | Implement theo plan. 50% check-in, deviation protocol, self-review |
 | ⏩ `vc-fast-mode-agent` | RESEARCH→INNOVATE→PLAN nén lại với safety pause bắt buộc |
 | 🧠 `vc-update-process-agent` | Checklist bắt buộc 7 bước bao gồm quét stale artifacts |
+| 🔧 `vc-quick-fix-agent` | QUICK FIX lane: một chỉnh sửa nhỏ ít rủi ro + kiểm tra có phạm vi, không cần plan/validate |
 
 <br>
 
@@ -1079,31 +1084,31 @@ process/features/{feature}/
 
 <br>
 
-### 31 Skills (tự động discover)
+### 33 Skills (tự động discover)
 
 <details>
 <summary>Click để xem danh sách skills (33 skills)</summary>
 
 <br>
 
-**🔧 Contract skills** — `vc-generate-plan` · `vc-generate-context` · `vc-audit-context` · `vc-audit-plans` · `vc-audit-vc` · `vc-setup` · `vc-update` · `vc-publish`
+**🔧 Contract skills** — `vc-generate-plan` · `vc-generate-context` · `vc-generate-spec` · `vc-generate-closeout` · `vc-generate-phase-program` · `vc-audit-context` · `vc-audit-plans` · `vc-audit-vc` · `vc-setup` · `vc-update` · `vc-publish`
 
-**🧠 Planning** — `vc-predict` (5-persona debate) · `vc-scenario` (12-dimension edge cases) · `vc-sequential-thinking` · `vc-problem-solving`
+**🧠 Lên plan & xác thực** — `vc-predict` (tranh luận 5 persona) · `vc-scenario` (edge cases 12 chiều) · `vc-sequential-thinking` · `vc-problem-solving` · `vc-feasibility-test` (thăm dò thực nghiệm) · `vc-risk-evidence-pack` · `vc-test-coverage-plan` · `vc-validate-findings` · `vc-agent-strategy-compare` · `vc-intent-clarify` · `vc-plan-discovery` · `vc-review-situation`
 
 **🐛 Debug & security** — `vc-debug` · `vc-security` (STRIDE + OWASP + auto-fix) · `vc-autoresearch` (autonomous optimization)
 
-**📚 Research** — `vc-docs-seeker` · `vc-scout`)
+**📚 Research** — `vc-docs-seeker` · `vc-scout`
 
-**🎨 Frontend** — `vc-frontend-design`· `vc-agent-browser` · `vc-web-testing`
+**🎨 Frontend** — `vc-frontend-design` · `vc-agent-browser` · `vc-web-testing`
 
-**⚙️ Utilities** —))
+**⚙️ Automation** — `vc-autopilot` (autonomous RIPER-5 runs) · `vc-context-discovery`
 
 </details>
 
 
 <br>
 
-### 🪝 7 Hooks
+### 🪝 10 Hooks
 
 | Hook | Chức năng |
 |------|-------------|
@@ -1114,6 +1119,9 @@ process/features/{feature}/
 | ✨ **Edit quality** | Sau 5+ edits, nhắc chạy code-simplifier (non-blocking, throttled) |
 | 📛 **Descriptive naming** | Language-aware file naming conventions trên mọi Write |
 | 📊 **Usage tracking** | Session metrics và token awareness |
+| 📋 **Plan structure check** (`post-write-plan-check.mjs`) | Xác thực cấu trúc plan artifact trên mọi Write vào file `*_PLAN_*.md` |
+| 🧹 **Commit message lint** (`post-commit-lint.mjs`) | Kiểm tra tiền tố conventional-commits trên mọi lệnh `git commit` qua Bash |
+| 🔍 **Stop validator sweep** (`stop-validator-sweep.cjs`) | Chạy các validator harness cốt lõi khi agent session kết thúc |
 
 <br>
 
@@ -1124,7 +1132,7 @@ your-project/
 ├── .claude/
 │   ├── agents/              # 🤖 15 agent definitions (.md)
 │   ├── skills/              # ⚡ 33 skill modules (each a directory with SKILL.md)
-│   └── hooks/               # 🪝 7 lifecycle hooks (.cjs)
+│   └── hooks/               # 🪝 10 lifecycle hooks (.cjs and .mjs)
 ├── .codex/
 │   └── agents/              # 🔄 Mirrored cho Codex compatibility
 ├── .agents/
@@ -1154,7 +1162,7 @@ Run vc-update
 
 ## Contributing
 
-Chúng tôi hoan nghênh contributions! Xem [CONTRIBUTING.md](CONTRIBUTING.md) để biết guidelines.
+Chúng tôi hoan nghênh contributions! Xem [CONTRIBUTING.md](../../CONTRIBUTING.md) để biết guidelines.
 
 <br>
 

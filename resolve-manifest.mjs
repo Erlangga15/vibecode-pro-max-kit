@@ -86,7 +86,7 @@ function walkDirAll(dirPath) {
     }
     for (const entry of entries) {
       const fullEntry = path.join(current, entry.name);
-      const relEntry = path.join(rel, entry.name);
+      const relEntry = path.join(rel, entry.name).split(path.sep).join('/');
       if (entry.isDirectory()) {
         walk(fullEntry, relEntry);
       } else if (entry.isFile()) {
@@ -195,8 +195,13 @@ function matchesExclude(filePath, excludePatterns) {
         ) {
           return true;
         }
+      } else if (suffix.includes("*")) {
+        // suffix is a basename glob like *.test.js — match against path.basename
+        const escaped = suffix.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+        const re = new RegExp("^" + escaped + "$");
+        if (re.test(path.basename(filePath))) return true;
       } else {
-        // suffix is a file pattern like .logs/**
+        // suffix is a plain file/dir name like .logs
         if (
           filePath.includes("/" + suffix + "/") ||
           filePath.startsWith(suffix + "/") ||
@@ -293,6 +298,7 @@ function resolveGlob() {
           strip: stripList,
           symlinks: symlinkMap,
           legacyDeletions: manifest.legacyDeletions || [],
+          ownedPaths: [...new Set([...managedFiles, ...(manifest.legacyDeletions || [])])].sort(),
         },
         null,
         2,
@@ -376,7 +382,7 @@ function walkDir(dirPath) {
     const entries = fs.readdirSync(current, { withFileTypes: true });
     for (const entry of entries) {
       const fullEntry = path.join(current, entry.name);
-      const relEntry = path.join(rel, entry.name);
+      const relEntry = path.join(rel, entry.name).split(path.sep).join('/');
       if (entry.isDirectory()) {
         walk(fullEntry, relEntry);
       } else if (entry.isFile()) {

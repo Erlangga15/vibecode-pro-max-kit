@@ -103,6 +103,6 @@ cat llms.txt | node scripts/analyze-llms-txt.js -  # → {totalUrls, distributio
 
 ## Environment
 
-Scripts load `.env`: `process.env` > `.claude/skills/docs-seeker/.env` > `.claude/skills/.env` > `.claude/.env`
+Scripts load `.env`: `process.env` > `.claude/skills/vc-docs-seeker/.env` > `.claude/skills/.env` > `.claude/.env`
 
-See `.env.example` for configuration options.
+Optional env vars: `CONTEXT7_API_KEY` (Bearer token for Context7 API), `DEBUG=true` (verbose logging).

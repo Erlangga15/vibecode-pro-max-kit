@@ -53,6 +53,7 @@ The manifest uses glob-based patterns resolved by `resolve-manifest.mjs`.
 | `copyIfMissing` | string[] | Glob patterns for files only installed if they don't already exist locally. |
 | `symlinks` | object | Symlink path -> target mappings to create/verify. |
 | `kitOnly` | string[] | Glob patterns for files in the kit repo but NOT installed into user projects. |
+| `legacyDeletions` | string[] | Paths to delete from user projects during migration (removed from kit but may linger on disk). Top-level key in `vc-manifest.json`; emitted in `resolve-manifest --json` output. |
 
 ### Legacy Schema (v2.0.x)
 
@@ -93,9 +94,13 @@ node "$TMPDIR/resolve-manifest.mjs" --root "$TMPDIR" --kit-only
   "merge": [".claude/settings.json"],
   "copyIfMissing": [],
   "strip": [],
-  "symlinks": { ".agents/skills": "../.claude/skills" }
+  "symlinks": { ".agents/skills": "../.claude/skills" },
+  "legacyDeletions": ["...paths to delete on migration..."],
+  "ownedPaths": ["...union of files + legacyDeletions, sorted..."]
 }
 ```
+
+`ownedPaths` is the union of `files` and `legacyDeletions` (deduplicated, sorted). It is the full set of paths the kit claims ownership of; `compute-sync-plan.mjs` uses it for stale-removal checks. `legacyDeletions` lists paths that no longer belong in the kit and should be deleted from user projects during migration.
 
 ## .vc-installed-files
 
@@ -126,7 +131,7 @@ A snapshot file written to the user project root after each install/update. Cont
 | Malformed vc-manifest.json | Step 4 | Print JSON parse error, clean up, stop |
 | Missing vc-manifest.json | Step 4 | Print "vc-manifest.json not found in remote", clean up, stop |
 | .vc-version missing | Step 2 | Not an error -- treat as `0.0.0` (first update) |
-| .vc-installed-files missing | Step 6 | Build synthetic snapshot from current filesystem, proceed |
+| .vc-installed-files missing | Step 6 | `priorSnapshot` set to `[]` (no disk scan); no stale removal via snapshot path; `legacyDeletions` still applied; snapshot written at apply time |
 | Permission denied on copy | Step 10 | Print which file, suggest `chmod`, **continue** with remaining |
 | Permission denied on delete | Step 10 | Print which file, suggest `chmod`, **continue** |
 | Symlink creation fails | Step 10 | Print error, suggest checking if target exists, **continue** |
@@ -155,10 +160,10 @@ Files in the `copyIfMissing` list are only installed if they don't already exist
 ### First update with v2.1.0 (no .vc-installed-files)
 
 Users upgrading from v2.0.x have no `.vc-installed-files` snapshot. The algorithm:
-1. Builds a synthetic snapshot from the local filesystem (files matching the remote file list that exist locally).
-2. Applies legacy deletions from v2.0.4 (embedded in the resolver).
-3. Writes the synthetic snapshot.
-4. Proceeds with normal diff logic.
+1. Sets `priorSnapshot = []` (empty — no disk scan). Files on disk that are not in the prior snapshot but are in the remote file list are treated as user-owned and placed in `toPreserve` (not modified). Files not on disk at all are added via `toAdd`.
+2. Applies `legacyDeletions` from the resolver (embedded LEGACY_DELETIONS in older kits, or `manifest.legacyDeletions` in v3.0.0+) independently — entries that exist on disk and pass the namespace guard are deleted.
+3. Writes the snapshot (sorted `ownedPaths`) at apply time.
+4. Subsequent updates use normal diff logic.
 
 ### Remote has new files not in local snapshot
 

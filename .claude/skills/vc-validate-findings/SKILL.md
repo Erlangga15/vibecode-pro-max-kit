@@ -5,7 +5,7 @@ argument-hint: "[plan file path]"
 trigger_keywords: validate findings, layer 1 dimensions, layer 2 feasibility, net gate, validate fan-out
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

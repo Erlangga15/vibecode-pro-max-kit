@@ -4,14 +4,14 @@
   <a href="docs/i18n/CONTRIBUTING.ja-JP.md">日本語</a> |
   <a href="docs/i18n/CONTRIBUTING.ko-KR.md">한국어</a> |
   <a href="docs/i18n/CONTRIBUTING.vi-VN.md">Tiếng Việt</a> |
-  <a href="docs/i18n/CONTRIBUTING.pt-BR.md">Portugues</a>
+  <a href="docs/i18n/CONTRIBUTING.pt-BR.md">Português</a>
 </p>
 
 # Contributing to vibecode-pro-max-kit
 
 Thank you for your interest in contributing to vibecode-pro-max-kit! This project provides a ready-to-use agent harness for Claude Code and Codex, and we welcome contributions from everyone.
 
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+By participating in this project, please be respectful and constructive in all interactions.
 
 ---
 
@@ -29,7 +29,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 Before contributing, make sure you have the following installed:
 
-- **Node.js** >= 20
+- **Node.js** >= 22
 - **bash** or **zsh** shell
 - **git** >= 2.30
 - **Operating system:** macOS, Linux, or Windows with WSL2
@@ -43,6 +43,8 @@ No additional package managers or runtimes are required. The harness is designed
 We welcome many kinds of contributions:
 
 ### Skills
+
+> **⚠️ Reserved prefix:** Do NOT name your custom skills or agents with the `vc-` prefix. That prefix is reserved for kit-shipped artifacts. The install/update stale-removal namespace guard treats `vc-*` paths under `.claude/skills/` and `.claude/agents/` as kit-owned — a custom `vc-foo` skill could be flagged for removal on the next `vc-update` run. Use any other prefix for your own additions.
 
 Skills are reusable capability modules that live under `.claude/skills/`. Each skill must:
 
@@ -259,7 +261,7 @@ All contributors are recognized:
 - **GitHub Release notes** -- Contributors credited in each release
 - **Skill/Agent credits** -- Your name in the `metadata.author` field of your contribution
 
-See `.all-contributorsrc` for bot configuration (created when the bot is first initialized).
+`.all-contributorsrc` is created lazily on first all-contributors bot run — it does not ship with the repo.
 
 ### Contributor Ladder
 

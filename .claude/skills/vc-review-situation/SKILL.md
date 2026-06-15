@@ -6,7 +6,7 @@ argument-hint: "[--json] [--fetch] [--selected-plan <path>] [--cwd <path>]"
 trigger_keywords: what's in flight, handoff, worktree status, active plans, next steps
 layer: helper
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

@@ -1,10 +1,10 @@
 ---
 name: vc-audit-context
 description: Audit project context routing, shared-skill discoverability, and Claude/Codex wiring. Use when context docs or skill surfaces move, split, or drift.
-trigger_keywords: audit context, context gaps, context routing, discoverability
+trigger_keywords: audit context, context gaps, context routing audit, discoverability
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

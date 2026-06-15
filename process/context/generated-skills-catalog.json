@@ -14,7 +14,7 @@
     {
       "folder": "vc-agent-browser",
       "name": "vc-agent-browser",
-      "description": "Browser automation. agent-browser CLI (Playwright) for navigation, snapshots, clicks, screenshots, video; bundled Puppeteer scripts for WebSocket debugging, console/network capture, and CDP scripting.",
+      "description": "AI-optimized browser automation CLI with context-efficient snapshots. Use for long autonomous sessions, self-verifying workflows, video recording, and cloud browser testing (Browserbase).",
       "aliases": [
         "vc-agent-browser"
       ],
@@ -23,12 +23,14 @@
         "browser",
         "screenshot",
         "scrape",
-        "automate browser",
-        "long browser session",
+        "automation",
+        "web automation",
+        "agent-browser",
         "browserbase",
-        "visual testing",
-        "websocket debug",
-        "console logs"
+        "cloud browser",
+        "headless",
+        "playwright",
+        "snapshot"
       ],
       "layer": "helper",
       "routedFrom": [
@@ -39,18 +41,9 @@
       "allowlisted": false,
       "allowlistReason": null,
       "relativeReferences": [
-        "references/agent-browser-vs-chrome-devtools.md",
-        "references/browserbase-cloud-setup.md",
-        "references/cdp-domains.md",
-        "references/performance-guide.md",
-        "references/puppeteer-reference.md",
-        "scripts/.browser-session.json",
-        "scripts/README.md",
-        "scripts/lib/browser.js"
+        "references/browserbase-cloud-setup.md"
       ],
-      "mentionedSkills": [
-        "vc-web-testing"
-      ]
+      "mentionedSkills": []
     },
     {
       "folder": "vc-agent-strategy-compare",
@@ -89,7 +82,7 @@
       "triggerKeywords": [
         "audit context",
         "context gaps",
-        "context routing",
+        "context routing audit",
         "discoverability"
       ],
       "layer": "contract",
@@ -143,7 +136,7 @@
       ],
       "normalizedName": "vcauditvc",
       "triggerKeywords": [
-        "harness",
+        "harness audit",
         "agent parity",
         "skill audit",
         "guide sync"
@@ -162,7 +155,7 @@
     {
       "folder": "vc-autopilot",
       "name": "vc-autopilot",
-      "description": "Emit and validate the provisional goal block artifact for an Autopilot Mode session. Owns the 9-field provisional block format (SESSION GOAL / ENTRY PHASE / REMAINING PHASES / CLARIFICATIONS LOCKED / EXECUTE CONSENT / DECISION POLICY / HARD STOPS / TEST GATES / START), resume detection from a pasted goal block, and the disk-persistence rule ({slug}_AUTOPILOT_GOAL_{date}.md in the task folder).",
+      "description": "Emit and validate the provisional goal block for Autopilot Mode. Owns the 9-field format and resume detection from a pasted goal block.",
       "aliases": [
         "vc-autopilot"
       ],
@@ -179,6 +172,7 @@
       ],
       "layer": "contract",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -232,11 +226,10 @@
         "context discovery",
         "load context",
         "feature folder files",
-        "context routing"
+        "context routing discovery"
       ],
       "layer": "contract",
       "routedFrom": [
-        "AGENTS.md",
         "CLAUDE.md",
         "process/context/generated-skills-catalog.json"
       ],
@@ -303,6 +296,7 @@
       ],
       "layer": "helper",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -317,7 +311,7 @@
     {
       "folder": "vc-feasibility-test",
       "name": "vc-feasibility-test",
-      "description": "Use when a SPEC, INNOVATE, or VALIDATE (Layer 2) approach hinges on an unverified runtime/library/ external mechanism: pick a probe from the 8-family taxonomy, run it within its cost/safety class, and produce a VIABLE/NOT-VIABLE/INCONCLUSIVE VERDICT artifact that states what the result licenses, forbids, and leaves uncertain.",
+      "description": "Use when a SPEC, INNOVATE, or VALIDATE (Layer 2) approach hinges on an unverified runtime/library/external mechanism: run a probe from the 8-family taxonomy and produce a VIABLE/NOT-VIABLE/INCONCLUSIVE VERDICT artifact.",
       "aliases": [
         "vc-feasibility-test"
       ],
@@ -335,6 +329,7 @@
       ],
       "layer": "contract",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -367,6 +362,7 @@
       ],
       "layer": "helper",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -391,6 +387,7 @@
       ],
       "layer": "contract",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -498,6 +495,7 @@
       ],
       "layer": "contract",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -511,7 +509,7 @@
     {
       "folder": "vc-intent-clarify",
       "name": "vc-intent-clarify",
-      "description": "Use when routing a user request to clarify intent before RIPER-5 phase delegation. Scores ambiguity with 4 binary signals, then generates structured multi-choice questions across 8+ dimensions for Tier 2. Questions are grouped, CRITICAL-flagged, and always include recommended options. Two-mode: SIMPLE (direct, 3-5 reads) and DEEP (research subagent first, then questions).",
+      "description": "Clarify intent before RIPER-5 phase delegation. Scores ambiguity (4 signals); generates structured multi-choice questions for Tier 2. Two-mode: SIMPLE and DEEP.",
       "aliases": [
         "vc-intent-clarify"
       ],
@@ -550,6 +548,7 @@
       ],
       "layer": "contract",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -574,6 +573,7 @@
       ],
       "layer": "helper",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -632,6 +632,7 @@
       ],
       "layer": "contract",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -689,6 +690,7 @@
       ],
       "layer": "contract",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -711,6 +713,7 @@
       ],
       "layer": "helper",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -765,6 +768,7 @@
       ],
       "layer": "helper",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -821,7 +825,7 @@
       "normalizedName": "vcsetup",
       "triggerKeywords": [
         "seed",
-        "harness",
+        "harness setup",
         "bootstrap",
         "new project",
         "scaffold",
@@ -829,6 +833,8 @@
       ],
       "layer": "helper",
       "routedFrom": [
+        "AGENTS.md",
+        "CLAUDE.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -857,6 +863,7 @@
       ],
       "layer": "contract",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,
@@ -944,6 +951,7 @@
       ],
       "layer": "helper",
       "routedFrom": [
+        "AGENTS.md",
         "process/context/generated-skills-catalog.json"
       ],
       "allowlisted": false,

@@ -290,7 +290,7 @@ Do NOT automatically transition modes. Wait for explicit command.
 
 Under /goal: when all exit gate conditions are met, emit `PHASE_COMPLETE: RESEARCH — findings summary written` and auto-proceed to **SPEC** (outer/standalone flow). In a phase-program INNER loop the inner loop skips SPEC, so RESEARCH advances directly to INNOVATE. Do NOT wait for explicit user command.
 
-**Phase program detection:** If research findings identify 3+ independent work streams or phases, MUST flag in the research findings summary: 'Phase program detected — orchestrator must use agent-team (not parallel-subagents) for PLAN phase per behavior-reference Section 0 Phase Program Exception.' Phase detection signals: explicit 'Phase N' labels in scope, 3+ independent work streams with no shared blast-radius files, or multi-session delivery horizon.
+**Phase program detection:** If research findings identify 3+ independent work streams or phases, MUST flag in the research findings summary: 'Phase program detected — orchestrator must use agent-team (not parallel-subagents) for PLAN phase per behavior-reference Section 2 (02-skill-tiers.md §Phase Program Exception) Phase Program Exception.' Phase detection signals: explicit 'Phase N' labels in scope, 3+ independent work streams with no shared blast-radius files, or multi-session delivery horizon.
 
 ## Autonomous /goal Execution Rule
 

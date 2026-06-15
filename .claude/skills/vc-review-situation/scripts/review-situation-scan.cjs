@@ -367,7 +367,7 @@ function readPlan(content, planPath, source) {
   };
 }
 
-function isFlowserActivePlanPath(filePath) {
+function isActivePlanPath(filePath) {
   const normalized = filePath.split(path.sep).join('/');
   if (!normalized.endsWith('.md')) return false;
   if (normalized.startsWith('process/general-plans/active/')) return true;
@@ -387,7 +387,7 @@ function discoverFeatureActiveRoots(root) {
 function getFilesystemActivePlanFiles(root) {
   const generalActive = path.join(root, 'process', 'general-plans', 'active');
   const roots = [generalActive, ...discoverFeatureActiveRoots(root)].filter((dir) => fs.existsSync(dir));
-  return roots.flatMap((dir) => walkFiles(dir)).filter((file) => isFlowserActivePlanPath(path.relative(root, file)));
+  return roots.flatMap((dir) => walkFiles(dir)).filter((file) => isActivePlanPath(path.relative(root, file)));
 }
 
 function scanFilesystemPlans(worktrees, warnings) {
@@ -421,7 +421,7 @@ function scanTrackedPlans(root, refs, warnings) {
     const listed = tryGit(['ls-tree', '-r', '--name-only', ref.refname, '--', 'process/general-plans/active', 'process/features'], root);
     if (!listed.ok || !listed.stdout) continue;
 
-    const planPaths = listed.stdout.split('\n').filter((file) => isFlowserActivePlanPath(file));
+    const planPaths = listed.stdout.split('\n').filter((file) => isActivePlanPath(file));
     for (const planPath of planPaths) {
       const shown = tryGit(['show', `${ref.refname}:${planPath}`], root);
       if (!shown.ok || !shown.stdout) {

@@ -32,12 +32,22 @@ function listAgentNames(dir, extension) {
 }
 
 function extractTableAgents(text) {
-  // Match backtick-wrapped agent names in markdown table rows like: | `agent-name` | ... |
+  // Match backtick-wrapped agent/skill names in markdown table rows like: | `agent-name` | ... |
+  // or: | 🔍 `agent-name` | ... | (with emoji prefix)
   const agents = new Set();
-  for (const match of text.matchAll(/\|\s*`([a-z0-9:-]+)`\s*\|/g)) {
+  for (const match of text.matchAll(/\|\s*[^|`]*`([a-z0-9_:-]+)`\s*\|/g)) {
     agents.add(match[1]);
   }
   return agents;
+}
+
+function extractInlineBackticks(text) {
+  // Match any backtick-wrapped name in text (tables OR inline like `vc-foo` · `vc-bar`)
+  const names = new Set();
+  for (const match of text.matchAll(/`([a-z0-9_:-]+)`/g)) {
+    names.add(match[1]);
+  }
+  return names;
 }
 
 const guidePath = "README.md";
@@ -47,7 +57,7 @@ if (!exists(guidePath)) {
   const guideText = read(guidePath);
 
   // Extract agents from README.md tables (Core + Specialists sections)
-  const agentsSectionMatch = guideText.match(/#{2,3} Agents\b[\s\S]*?(?=\n#{2,3} [^#]|\n---)/);
+  const agentsSectionMatch = guideText.match(/#{2,3} \d* ?Agents\b[\s\S]*?(?=\n#{2,3} [^#]|\n---)/);
   const agentsSection = agentsSectionMatch ? agentsSectionMatch[0] : "";
   const guideAgents = extractTableAgents(agentsSection);
 
@@ -70,10 +80,10 @@ if (!exists(guidePath)) {
 
   // --- Skill sync ---
 
-  // Extract skills from all README.md skill catalog tables
-  const skillsSectionMatch = guideText.match(/#{2,3} Skills Catalog\b[\s\S]*?(?=\n#{2,3} [^#]|\n---\n\n#{2,3} )/);
+  // Extract skills from all README.md skill catalog section (skills listed inline, not as tables)
+  const skillsSectionMatch = guideText.match(/#{2,3} \d+ Skills\b[\s\S]*?(?=\n#{2,3} [^#]|\n---\n\n#{2,3} )/);
   const skillsSection = skillsSectionMatch ? skillsSectionMatch[0] : "";
-  const guideSkills = extractTableAgents(skillsSection);
+  const guideSkills = extractInlineBackticks(skillsSection);
 
   // Get disk skills that have a SKILL.md
   const diskSkillDirs = listSkillDirs();

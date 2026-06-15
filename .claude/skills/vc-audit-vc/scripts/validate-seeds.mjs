@@ -28,8 +28,6 @@ if (!fs.existsSync(seedsDir)) {
     "general-plans/active",
     "general-plans/completed",
     "general-plans/backlog",
-    "general-plans/reports",
-    "general-plans/references",
     "features/_feature-template",
   ];
 

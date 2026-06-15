@@ -1,5 +1,6 @@
 .vc-version
 .vc-publish-config
+.vibecode-backup/
 node_modules/
 .DS_Store
 *.log

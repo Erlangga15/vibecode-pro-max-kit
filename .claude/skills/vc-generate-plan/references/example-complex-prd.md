@@ -6,7 +6,7 @@ metadata:
   node_type: memory
   type: reference
 ---
-# LinkedIn Achievements Dashboard: Shareable Analytics PRD
+# SocialNet Engagement Dashboard: Shareable Analytics PRD
 
 **Date**: January 25, 2026
 **Complexity**: COMPLEX (Multi-phase)
@@ -15,7 +15,7 @@ metadata:
 
 ## Overview
 
-Build a visually impressive, shareable achievements section within the existing Next.js account dashboard that showcases LinkedIn engagement metrics. The dashboard displays verified/assisted comment statistics, activity streaks, network visualization via treemap, contribution heat map, and best friends rankings. Designed with a bento box layout using the neobrutalist theme, optimized for social media sharing.
+Build a visually impressive, shareable achievements section within the existing Next.js account dashboard that showcases SocialNet engagement metrics. The dashboard displays verified/assisted comment statistics, activity streaks, network visualization via treemap, contribution heat map, and best friends rankings. Designed with a bento box layout using the neobrutalist theme, optimized for social media sharing.
 
 **Status**: ⏳ PLANNED
 
@@ -42,7 +42,7 @@ Build a visually impressive, shareable achievements section within the existing 
 
 ## 1. Context and Goals
 
-EngageKit users manage multiple LinkedIn accounts and post AI-assisted comments. The achievements dashboard serves as a growth hack mechanism - users can proudly showcase their engagement statistics on social media, driving organic visibility and user acquisition.
+MyPlatform users manage multiple SocialNet accounts and post AI-assisted comments. The achievements dashboard serves as a growth hack mechanism - users can proudly showcase their engagement statistics on social media, driving organic visibility and user acquisition.
 
 **In-scope**:
 - Achievements section integrated into existing account dashboard (`/[orgSlug]/[accountSlug]/page.tsx`)
@@ -125,7 +125,7 @@ For multi-phase execution workflow, see [process/development-protocols/phase-pro
 - Third-party analytics integrations
 
 **Constraints**:
-- Must use existing Prisma schema (`Comment`, `LinkedInAccount`, `User`)
+- Must use existing Prisma schema (`Comment`, `SocialNetAccount`, `User`)
 - Must follow neobrutalist theme from `@your-org/ui`
 - Mobile viewport minimum: 375px width
 - Browser support: Last 2 versions of Chrome, Firefox, Safari, Edge
@@ -306,7 +306,7 @@ grid-template-areas:
 **Decision**: Stack all cards vertically on mobile (<768px), 2-column on tablet (768px-1024px), full bento grid on desktop (>1024px).
 
 **Rationale**:
-- Mobile users comprise 60%+ of LinkedIn traffic
+- Mobile users comprise 60%+ of SocialNet traffic
 - Vertical stacking is simplest and most accessible on narrow viewports
 - Tablet users get partial bento experience (treemap + heatmap side-by-side)
 - Desktop users get full visual impact
@@ -335,7 +335,7 @@ grid-template-areas:
 **Benefits of Integration**:
 - ✅ No additional navigation required (visible immediately)
 - ✅ Prominent placement encourages social sharing
-- ✅ Contextually relevant (achievements per LinkedIn account, not global)
+- ✅ Contextually relevant (achievements per SocialNet account, not global)
 - ✅ Reuses existing layout/auth infrastructure
 
 ### Alternative Approaches Considered
@@ -407,13 +407,13 @@ User sees fully populated achievements dashboard
 
 **Authentication**:
 - All tRPC procedures use `accountProcedure` (requires Clerk auth + account ownership)
-- Validates user has access to requested LinkedIn account
+- Validates user has access to requested SocialNet account
 - Prevents cross-account data leakage
 
 **Data Privacy**:
 - Only shows data for comments posted by current account (filtered by `accountId`)
 - Profile pictures from `owner.imageUrl` (Clerk-managed, already public)
-- Network data shows LinkedIn profile URLs (already public information)
+- Network data shows SocialNet profile URLs (already public information)
 - No sensitive metadata exposed (touch scores are internal metrics)
 
 **Rate Limiting**:
@@ -527,7 +527,7 @@ useEffect(() => {
 ```
 ┌──────────────────────────────────┐
 │  [Avatar]  @account-slug         │
-│            LinkedIn Engagement   │
+│            SocialNet Engagement   │
 │            2026                  │
 ├──────────────────────────────────┤
 │  🎯 234      🤝 156      🏆 TOP  │
@@ -551,7 +551,7 @@ useEffect(() => {
 - Visualize interaction frequency via box size
 - Render profile pictures inside boxes
 - Show names and interaction counts on hover
-- Handle click to open LinkedIn profile in new tab
+- Handle click to open SocialNet profile in new tab
 
 **Data Source**: `useAchievementsStore((s) => s.networkData)` (top 50 profiles)
 
@@ -645,7 +645,7 @@ useEffect(() => {
 **Existing Models** (No changes required):
 
 ```prisma
-model LinkedInAccount {
+model SocialNetAccount {
   id               String   @id @default(uuid())
   profileSlug      String?  @unique
   ownerId          String?
@@ -657,7 +657,7 @@ model LinkedInAccount {
 model User {
   id                  String   @id  // Clerk user ID
   imageUrl            String?       // Profile picture
-  linkedInAccounts    LinkedInAccount[]
+  socialNetAccounts    SocialNetAccount[]
   // ... other fields
 }
 
@@ -670,7 +670,7 @@ model Comment {
   authorName        String?
   authorProfileUrl  String?
   authorAvatarUrl   String?
-  account           LinkedInAccount? @relation(fields: [accountId], references: [id])
+  account           SocialNetAccount? @relation(fields: [accountId], references: [id])
 
   @@index([accountId])
   @@index([status])
@@ -789,7 +789,7 @@ getProfileMetrics: accountProcedure
     const { currentStreak, longestStreak } = calculateStreaks(comments);
 
     // Profile info
-    const account = await ctx.db.linkedInAccount.findUnique({
+    const account = await ctx.db.socialNetAccount.findUnique({
       where: { id: accountId },
       include: { owner: { select: { imageUrl: true } } }
     });
@@ -1053,7 +1053,7 @@ function calculateStreaks(comments: { commentedAt: Date | null }[]): {
 ### Should-Have (S)
 
 - [S-001] Hover tooltips on heat map cells
-- [S-002] Click-to-LinkedIn on network treemap boxes
+- [S-002] Click-to-SocialNet on network treemap boxes
 - [S-003] Medal icons for top 3 in best friends ranking
 - [S-004] Smooth transitions between loading/success states
 - [S-005] Empty states when no data available
@@ -1150,7 +1150,7 @@ _Phase plan files use the naming convention `phase-NN-{slug}_PLAN_{dd-mm-yy}.md`
 3. Implement assisted count query (`peakTouchScore 50-80`)
 4. Implement global percentile calculation (cross-account aggregation)
 5. Implement streak calculation logic (helper function)
-6. Fetch profile slug and image URL via LinkedInAccount → User relation
+6. Fetch profile slug and image URL via SocialNetAccount → User relation
 7. Add error handling and logging
 8. Write unit tests for streak calculation function
 
@@ -1304,7 +1304,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 4. Implement merged hero header section:
    - Avatar component with `profileImageUrl` or fallback
    - Display `@{profileSlug}`
-   - Title: "LinkedIn Engagement 2026"
+   - Title: "SocialNet Engagement 2026"
 4. Implement metrics grid (3 columns):
    - Verified count with icon (🎯) and label
    - Assisted count with icon (🤝) and label
@@ -1396,7 +1396,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
    ```
 5. Wrap in ResponsiveContainer for fluid sizing
 6. Add Radix Tooltip for hover details
-7. Implement click handler (navigate to LinkedIn profile in new tab)
+7. Implement click handler (navigate to SocialNet profile in new tab)
 8. Handle loading state (Skeleton)
 9. Handle empty state ("No interactions yet" message)
 
@@ -1404,7 +1404,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 1. Import NetworkTreemapCard in AchievementsSection
 2. Place in grid-area "treemap" (60% width on desktop)
 3. Test responsiveness (treemap scales correctly)
-4. Verify click-to-LinkedIn works (opens in new tab)
+4. Verify click-to-SocialNet works (opens in new tab)
 5. Test hover tooltips (shows full name + exact count)
 6. Verify neobrutalist borders on treemap cells
 7. Test with various data sizes (5 profiles, 50 profiles)
@@ -1420,7 +1420,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 - [ ] Profile pictures appear inside boxes (when box large enough)
 - [ ] Author names and counts visible
 - [ ] Hover shows tooltip with full details
-- [ ] Click navigates to LinkedIn profile in new tab
+- [ ] Click navigates to SocialNet profile in new tab
 - [ ] Empty state shows when no network data
 - [ ] Loading skeleton appears during query pending
 - [ ] Neobrutalist theme applied (black borders, chart colors)
@@ -1562,8 +1562,8 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 6. Test with varying name lengths (truncation)
 
 **Stage 5: Interactions**
-1. Make entire item clickable (navigate to LinkedIn profile)
-2. Add accessible link with aria-label: "View {name} on LinkedIn"
+1. Make entire item clickable (navigate to SocialNet profile)
+2. Add accessible link with aria-label: "View {name} on SocialNet"
 3. Open in new tab (`target="_blank" rel="noopener noreferrer"`)
 4. Add hover cursor pointer
 5. Test keyboard navigation (tab, enter)
@@ -1580,7 +1580,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 - [ ] Medal icons for top 3 ranks
 - [ ] Progress bars proportional to interaction count
 - [ ] Avatars show profile pictures or fallback initials
-- [ ] Click navigates to LinkedIn profile in new tab
+- [ ] Click navigates to SocialNet profile in new tab
 - [ ] Loading skeleton appears during query pending
 - [ ] Empty state shows when no network data
 - [ ] Neobrutalist theme applied (borders, shadows)
@@ -1732,7 +1732,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 6. Test on slow 3G network (throttle in DevTools)
 
 **Stage 6: Manual QA**
-1. Test on real LinkedIn accounts with varying data:
+1. Test on real SocialNet accounts with varying data:
    - Account with 0 comments
    - Account with 1-10 comments
    - Account with 100+ comments
@@ -1829,7 +1829,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 - [ ] Error boundaries catch failures with retry option
 - [ ] Empty states show user-friendly messages
 - [ ] Tooltips provide additional context on hover
-- [ ] Links open LinkedIn profiles in new tab
+- [ ] Links open SocialNet profiles in new tab
 - [ ] Keyboard navigation works throughout
 
 ---
@@ -1855,7 +1855,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 **Phase 4 (Q4 2026)**:
 - Gamification features (levels, XP, leaderboards)
 - Social comparison (opt-in, compare with peers)
-- Third-party integrations (share to Twitter/LinkedIn directly)
+- Third-party integrations (share to Twitter/SocialNet directly)
 - Analytics dashboard (track achievements over time)
 
 ### Technical Debt
@@ -1921,7 +1921,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 - [ ] Create `NetworkTreemapCard.tsx` component
 - [ ] Integrate Recharts `<Treemap>`
 - [ ] Add hover tooltips
-- [ ] Implement click-to-LinkedIn
+- [ ] Implement click-to-SocialNet
 - [ ] Add loading/error/empty states
 - [ ] Test with varying data sizes
 
@@ -1942,7 +1942,7 @@ See [API Surface](#11-api-surface-trpc) section above for full contracts.
 - [ ] Implement ranking list
 - [ ] Add medal icons
 - [ ] Add progress bars
-- [ ] Implement click-to-LinkedIn
+- [ ] Implement click-to-SocialNet
 - [ ] Add loading/error/empty states
 
 **Phase 9: Responsive Design** (3 hours)

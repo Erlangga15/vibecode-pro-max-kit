@@ -50,10 +50,66 @@ node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
 node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs
 node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
 node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+```
+
+Expected: all 4 exit 0 (these are structural validators — non-zero = failure).
+
+To inspect the skill catalog (informational, not a pass/fail validator):
+
+```bash
 node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs
 ```
 
-Expected: all exit 0; discover-skills.mjs lists 33 skills.
+Expected output: lists 33 skills grouped by layer.
+
+### Step 3 — Migrate process/ layout (existing users)
+
+v3.0.0 changed how plan artifacts are stored. The new layout uses task-folder
+convention (`active/{slug}_{date}/{slug}_PLAN_{date}.md`) and deprecates
+`reports/` and `references/` sibling dirs (artifacts now colocate inside the
+task folder). `vc-update` does **not** migrate your existing plan folders — it
+only updates harness files under `.claude/`, `.codex/`, and `.agents/`.
+
+**To migrate your existing `process/` layout**, run vc-setup in your project:
+
+```
+Run vc-setup
+```
+
+vc-setup detects an existing project (Flow B / Merge mode) and:
+1. Shows you a LAYOUT CHANGES summary listing old-layout folders it found.
+2. Waits for your approval before moving anything.
+3. Migrates flat `*_PLAN_*.md` files in `active/` into `{slug}_{date}/` task
+   folders, moving completed plans to `completed/` and active ones to `active/`.
+4. Notes any `reports/` or `references/` sibling dirs — these are not
+   auto-migrated. Move their contents into the nearest task folder manually, or
+   leave them in place (they are read-only legacy artifacts and do not break the
+   harness).
+
+If you prefer to skip vc-setup, the harness still works with the old flat layout
+— the legacy shapes are read-only compatible. Only new plans need to use the
+task-folder convention.
+
+### Step 4 — Run validators
+
+Run the four core structural validators after the upgrade and after any layout migration:
+
+```bash
+node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
+node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs
+node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
+node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+```
+
+All four must exit 0 before you start using the upgraded harness.
+
+To inspect the skill catalog (informational — prints a grouped list, not a structural pass/fail check):
+
+```bash
+node .claude/skills/vc-context-discovery/scripts/discover-skills.mjs
+```
+
+Expected output: lists 33 skills grouped by layer. This script exits non-zero when the catalog is missing or the count is too low — treat that as a signal to re-run `vc-update`, not as a structural validator failure on its own.
 
 ---
 
@@ -75,7 +131,7 @@ The following 11 skill directories will be **removed** from your project:
 .claude/skills/vc-context-engineering
 ```
 
-The following 5 protocol files will also be removed (content merged into `orchestration.md`):
+The following 5 protocol files will also be removed:
 
 ```
 process/development-protocols/references/example-complex-prd.md
@@ -84,6 +140,13 @@ process/development-protocols/intent-clarification.md
 process/development-protocols/parallel-fan-out.md
 process/development-protocols/archive/vc-system-behavior-reference_ARCHIVED_09-06-26.md
 ```
+
+Disposition per file:
+- `references/example-complex-prd.md` — **moved** to `.claude/skills/vc-generate-plan/references/example-complex-prd.md` (canonical v3 location)
+- `references/example-simple-prd.md` — **moved** to `.claude/skills/vc-generate-plan/references/example-simple-prd.md` (canonical v3 location)
+- `intent-clarification.md` — **merged** into `orchestration.md` (content folded into §Intent Clarification)
+- `parallel-fan-out.md` — **merged** into `orchestration.md` (content folded into §Parallel Fan-Out Checkpoints)
+- `archive/vc-system-behavior-reference_ARCHIVED_09-06-26.md` — **deleted** (superseded by the 12-file `vc-system-behavior/` split; kept only as git history)
 
 **If you had custom code inside any of the removed skills:** recover it from git history with `git show HEAD:.claude/skills/<skill-name>/SKILL.md` before running the upgrade.
 
@@ -122,6 +185,133 @@ Recommendation: keep project-specific content in `process/context/all-context.md
 ### `.claude/settings.json`
 
 This file is **merge-protected** — vc-update skips it if it exists locally. Your custom settings are preserved. Review the updated template from the kit if you want to adopt new hook configurations.
+
+### ⚠️ Action required: settings.json hooks
+
+Because `.claude/settings.json` is merge-protected, any hooks added in v3.0.0 will **not** fire in your upgraded project until you manually add them. Your existing hooks are untouched — but new v3 hooks will be silently absent.
+
+**Specifically missing after upgrade** (the four hooks most likely absent from a v2.x install):
+
+| Hook | File | What it does |
+|---|---|---|
+| PostToolUse (Write) | `post-write-plan-check.mjs` | Validates plan artifact structure every time a plan file is written |
+| PostToolUse (Bash) | `post-commit-lint.mjs` | Lints commit messages for conventional-commit prefix |
+| Stop | `stop-validator-sweep.cjs` | Runs core validator suite on session end |
+| SubagentStart | `subagent-init.cjs` | Injects compact context into every subagent |
+
+**How to check:** diff your current file against the kit backup or the template:
+
+```bash
+diff .claude/settings.json .vibecode-backup/.claude/settings.json
+```
+
+**What to add (paste-ready):** The complete v3.0.0 `hooks` block is shown below. Merge any missing entries into your existing `.claude/settings.json`:
+
+```json
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-init.cjs"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/subagent-init.cjs"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/descriptive-name.cjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Glob|Grep|Read|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scout-block.cjs"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/privacy-block.cjs"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-state.cjs"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-edit-simplify-reminder.cjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-write-plan-check.mjs"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-commit-lint.mjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop-validator-sweep.cjs"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Hook summary:
+- **SessionStart** → `session-init.cjs` — detects stack, injects env, recovers approval gates after compaction
+- **SubagentStart** → `subagent-init.cjs` — injects compact context into every subagent
+- **PreToolUse (Write)** → `descriptive-name.cjs` — language-aware file naming guard
+- **PreToolUse (Bash|Glob|Grep|Read|Edit|Write)** → `scout-block.cjs`, `privacy-block.cjs` — prevents wandering into `node_modules/`, blocks credential leaks
+- **PostToolUse (Edit|Write|MultiEdit)** → `session-state.cjs`, `post-edit-simplify-reminder.cjs` — session metrics + simplifier nudge after 5+ edits
+- **PostToolUse (Write)** → `post-write-plan-check.mjs` — validates plan artifact structure on every plan write
+- **PostToolUse (Bash)** → `post-commit-lint.mjs` — lints commit messages for conventional-commit prefix
+- **Stop** → `stop-validator-sweep.cjs` — runs core validator suite on session end
 
 ### Custom RIPER-5 workflow references
 

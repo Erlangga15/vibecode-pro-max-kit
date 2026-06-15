@@ -10,7 +10,6 @@
     "CLAUDE.md",
     "AGENTS.md",
     "process/development-protocols/**",
-    "process/context/planning/example-*.md",
     "process/context/generated-skills-catalog.json",
     "process/_seeds/**",
     "process/_seeds/**/.gitkeep",
@@ -23,18 +22,29 @@
     "process/general-plans/**",
     "**/.git/**",
     "**/.logs/**",
-    ".codex/statusline.cjs",
+
     "**/node_modules/**",
     "**/screenshots/**",
-    "**/.browser-session.json"
+    "**/.browser-session.json",
+    "**/__tests__/**",
+    "**/tests/**",
+    "**/*.test.js",
+    "**/*.test.cjs",
+    "**/*.test.mjs",
+    "**/*.test.md",
+    ".claude/skills/vc-debug/scripts/find-polluter.test.md",
+    ".claude/skills/vc-review-situation/scripts/review-situation-scan.test.cjs",
+    ".claude/hooks/scout-block/tests/**",
+    ".codex/hooks/scout-block/tests/**",
+    ".claude/skills/vc-agent-browser/scripts/package-lock.json",
+    ".claude/skills/vc-sequential-thinking/package.json",
+    ".claude/skills/vc-sequential-thinking/.gitignore"
   ],
   "strip": [],
   "merge": [
     ".claude/settings.json"
   ],
-  "copyIfMissing": [
-    "process/context/planning/example-*.md"
-  ],
+  "copyIfMissing": [],
   "symlinks": {
     ".agents/skills": "../.claude/skills"
   },
@@ -43,13 +53,15 @@
     "README-preview*.html",
     "CONTRIBUTING.md",
     "SECURITY.md",
-    "TRADEMARK.md",
+
     "LICENSE",
     "docs/**",
     "assets/**",
     ".github/**",
     "resolve-manifest.mjs",
-    "install.sh"
+    "install.sh",
+    "compute-sync-plan.mjs",
+    "e2e-kit-flows.test.mjs"
   ],
   "legacyDeletions": [
     ".claude/skills/vc-team",

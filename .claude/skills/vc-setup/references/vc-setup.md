@@ -170,6 +170,17 @@ The combination of existing context + fresh user input produces the best results
 
 ## DETECT Phase
 
+### Project Manifest Detection
+
+Before reading `package.json`, check which project manifest is present. Use this fallback chain:
+
+1. `package.json` → Node/Bun/Deno project (JS/TS); proceed with full JS detection below.
+2. `pyproject.toml` or `requirements.txt` → Python project; adapt detection heuristics (skip package manager / framework checks, detect test runner from `pytest`/`unittest`, detect ORM from `sqlalchemy`/`django`).
+3. `go.mod` → Go project; detect module name, infer test runner (`go test`).
+4. `Gemfile` → Ruby project; detect framework (`rails`/`sinatra`), test runner (`rspec`/`minitest`).
+5. `Cargo.toml` → Rust project; detect workspace members, test runner (`cargo test`).
+6. None found → Ask the user: "I couldn't find a project manifest (package.json, pyproject.toml, go.mod, Gemfile, Cargo.toml). What language/runtime does this project use? I'll adapt the setup to match."
+
 ### Package Manager Detection
 
 Read `package.json` and check these signals in order:
@@ -286,26 +297,20 @@ process/_seeds/
     _feature-template/
       _GUIDE.md.seed                     -- template for new feature folder guides
       active/
-        _GUIDE.md                        -- active plans guide
+        _GUIDE.md                        -- active plans guide (task-folder convention)
       completed/
         _GUIDE.md                        -- completed plans guide
       backlog/
         _GUIDE.md                        -- backlog guide
-      reports/
-        _GUIDE.md                        -- reports guide
-      references/
-        _GUIDE.md                        -- references guide
+      (no reports/ or references/ — these are deprecated sibling dirs; artifacts colocate inside task folders)
   general-plans/
     active/
-      _GUIDE.md                          -- active plans guide
+      _GUIDE.md                          -- active plans guide (task-folder convention)
     completed/
       _GUIDE.md                          -- completed plans guide
     backlog/
       _GUIDE.md                          -- backlog guide
-    reports/
-      _GUIDE.md                          -- reports guide
-    references/
-      _GUIDE.md                          -- references guide
+    (no reports/ or references/ — deprecated; artifacts go inside task folders under active/ or completed/)
 ```
 
 ### Target Directory Tree (after SCAFFOLD)
@@ -332,29 +337,23 @@ process/
       all-tests.md.seed              -- structural reference companion
   general-plans/
     active/
-      _GUIDE.md
+      _GUIDE.md                      -- documents task-folder convention
     completed/
       _GUIDE.md
     backlog/
       _GUIDE.md
-    reports/
-      _GUIDE.md
-    references/
-      _GUIDE.md
+    (reports/ and references/ are NOT created for new repos — deprecated sibling dirs)
   features/
     _GUIDE.md
     _feature-template/
       _GUIDE.md.seed                 -- template for new feature folder guides
       active/
-        _GUIDE.md
+        _GUIDE.md                    -- documents task-folder convention
       completed/
         _GUIDE.md
       backlog/
         _GUIDE.md
-      reports/
-        _GUIDE.md
-      references/
-        _GUIDE.md
+      (reports/ and references/ are NOT created for new repos — deprecated sibling dirs)
 ```
 
 ### Migration Mode Decision Logic
@@ -390,8 +389,10 @@ Detect old directory layouts and reorganize them into the harness standard struc
 | `process/plans/` exists, no `process/general-plans/` | Create `process/general-plans/active/` and `process/general-plans/completed/`. For each file in `process/plans/`: scan for "COMPLETE", "DONE", or checkmark markers -- move matches to `completed/`, move the rest to `active/`. Remove empty `process/plans/`. |
 | `process/reports/` exists at top level | Move `process/reports/*` to `process/general-plans/reports/`. Remove empty `process/reports/`. |
 | `process/skills/` exists at top level | Move `process/skills/*` to `process/general-plans/backlog/`. Remove empty `process/skills/`. |
-| Example PRDs at old locations (under `process/context/` or `process/context/planning/`) not yet moved to `process/development-protocols/references/` | Move to `process/development-protocols/references/`. |
+| Example PRDs at old locations (under `process/context/`, `process/context/planning/`, or `process/development-protocols/references/`) | Move to `.claude/skills/vc-generate-plan/references/`. |
 | process/context/backlog.md | Move to `process/general-plans/backlog/backlog.md` |
+| Flat `*_PLAN_*.md` file directly in `process/general-plans/active/` or `process/features/*/active/` (pre-v3.0.0 layout) | Create a `{slug}_{date}/` task subfolder and move the plan file inside it. Scan the plan for "COMPLETE"/"DONE" markers; if found, create under `completed/{slug}_{date}/` instead. Never overwrite if a task folder with the same name exists — add `-migrated` suffix. |
+| `process/general-plans/reports/`, `process/general-plans/references/`, or `process/features/*/reports/`, `process/features/*/references/` sibling directories | **Not auto-migrated.** List their contents to the user in the LAYOUT CHANGES section and recommend moving files into the nearest task folder manually. Leave in place if the user prefers — they are read-only legacy artifacts and do not break the harness. Do NOT create new `reports/` or `references/` sibling dirs during scaffold. |
 
 **Migration rules:**
 - Never overwrite existing files at the destination. If a same-name file exists, keep both (rename the migrated copy with a `-migrated` suffix).
@@ -613,7 +614,7 @@ Verify all directories from the target tree exist:
 
 ```bash
 ls -d process/development-protocols/ process/context/ process/context/planning/ process/context/tests/ process/general-plans/active/ process/general-plans/completed/ process/general-plans/backlog/ process/features/
-# Note: process/general-plans/reports/ and process/general-plans/references/ are deprecated sibling dirs for new repos; skip if absent
+# process/general-plans/reports/ and process/general-plans/references/ are deprecated sibling dirs — do NOT create them for new repos; skip if absent on existing repos
 ```
 
 ### STUDY Output Quality Checks

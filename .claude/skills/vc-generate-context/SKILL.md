@@ -4,7 +4,7 @@ description: Generate or update the project's authoritative repository context a
 trigger_keywords: generate context, update context, refresh context, missing context
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

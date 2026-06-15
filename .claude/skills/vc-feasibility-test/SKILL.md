@@ -1,15 +1,11 @@
 ---
 name: vc-feasibility-test
-description: >-
-  Use when a SPEC, INNOVATE, or VALIDATE (Layer 2) approach hinges on an unverified runtime/library/
-  external mechanism: pick a probe from the 8-family taxonomy, run it within its
-  cost/safety class, and produce a VIABLE/NOT-VIABLE/INCONCLUSIVE VERDICT artifact
-  that states what the result licenses, forbids, and leaves uncertain.
+description: "Use when a SPEC, INNOVATE, or VALIDATE (Layer 2) approach hinges on an unverified runtime/library/external mechanism: run a probe from the 8-family taxonomy and produce a VIABLE/NOT-VIABLE/INCONCLUSIVE VERDICT artifact."
 argument-hint: "[hypothesis] [task-folder] [probe-family]"
 trigger_keywords: feasibility, spike, verify assumption, probe mechanism, empirical check, unverified mechanism, does this work, runtime quirk, api shape check
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "2.0.0"
 ---
 

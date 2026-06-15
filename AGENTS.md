@@ -1,5 +1,7 @@
 # AGENTS.md
 
+**Bootstrap guard:** If `process/context/all-context.md` does not exist, the harness has not been set up yet (a bare `process/context/` holding only `generated-skills-catalog.json` from install does NOT count). Run `vc-setup` before any task — the context router and protocol docs are absent and agents will not route correctly.
+
 This file is the Codex compatibility layer for the existing `.claude/` system.
 
 Keep this file aligned with [CLAUDE.md](CLAUDE.md)
@@ -75,7 +77,7 @@ RIPER-5?", can be answered directly.
 
 Authoritative context for this repository:
 
-[process/context/all-context.md](process/context/all-context.md)
+`process/context/all-context.md`
 
 Contains:
 
@@ -88,9 +90,9 @@ Contains:
 
 Before substantial planning or implementation work, consult:
 
-- [process/context/all-context.md](process/context/all-context.md)
+- `process/context/all-context.md`
 - [process/development-protocols/all-development-protocols.md](process/development-protocols/all-development-protocols.md)
-- [.claude/memory/MEMORY.md](.claude/memory/MEMORY.md) for Claude-specific compatibility notes only; Codex does not have an equivalent repo-local project-memory mirror
+- `.claude/memory/MEMORY.md` for Claude-specific compatibility notes only; Codex does not have an equivalent repo-local project-memory mirror
 
 **Context routing discipline:** `all-*.md` entrypoints are routers, not the full knowledge. Agents MUST follow the routing tables in `all-*.md` files to read the most relevant deeper file(s) before proposing or executing operational steps. Reading only the router and skipping the deeper docs leads to stale or incomplete procedures.
 
@@ -379,6 +381,10 @@ but Claude's YAML `tools:` allowlists are not guaranteed to be enforced by Codex
 - Claude tools: Read, Write, Edit, Grep, Glob, Bash, update_memory
 - Use: Capturing learnings, updating documentation
 
+> **Tier-1 REQUIRED audits in UPDATE PROCESS (C4):** `vc-audit-vc`, `vc-audit-context`, and `vc-audit-plans` are not merely on-demand tools — they are Tier-1 REQUIRED gates the UPDATE PROCESS phase MUST run per change type (harness/agent edits → `vc-audit-vc`; context-doc edits → `vc-audit-context`; plan/program edits → `vc-audit-plans`). See `process/development-protocols/vc-system-behavior/12-reference.md`.
+
+> **Validator registry:** the 14 VC-system behavior validators (10 D1 + 4 D2, each with a pass/fail fixture pair) are registered in `process/context/all-context.md` §Testing-and-Quality. Run the change-type-relevant validator before closing a phase.
+
 ### Specialist Agents
 
 These agents add capabilities beyond the core RIPER-5 workflow. They are invoked by the
@@ -386,12 +392,12 @@ orchestrator or by execute-agent when specialized work is needed.
 
 During EXECUTE phase:
 
-- `vc-tester` - Diff-aware test verification. Maps changed files to test files, runs only affected tests. Invoke after implementation sub-steps complete.
-- `vc-debugger` - Root cause analysis for bugs. Evidence-before-hypothesis methodology. Can also be invoked standalone.
-- `vc-code-reviewer` - Production-readiness review. Edge case scouting, N+1 detection, auth path validation. Invoke as pre-PR quality gate.
-- `vc-code-simplifier` - Post-implementation refactor for clarity without behavior change. Invoke after code-reviewer passes.
-- `vc-ui-ux-designer` - Design-aware frontend implementation. Invoke for UI/UX tasks within execute phase.
-- `vc-git-manager` - Clean conventional commits. Invoke for git operations.
+- [.claude/agents/vc-tester.md](.claude/agents/vc-tester.md) - Diff-aware test verification. Maps changed files to test files, runs only affected tests. Invoke after implementation sub-steps complete.
+- [.claude/agents/vc-debugger.md](.claude/agents/vc-debugger.md) - Root cause analysis for bugs. Evidence-before-hypothesis methodology. Can also be invoked standalone.
+- [.claude/agents/vc-code-reviewer.md](.claude/agents/vc-code-reviewer.md) - Production-readiness review. Edge case scouting, N+1 detection, auth path validation. Invoke as pre-PR quality gate.
+- [.claude/agents/vc-code-simplifier.md](.claude/agents/vc-code-simplifier.md) - Post-implementation refactor for clarity without behavior change. Invoke after code-reviewer passes.
+- [.claude/agents/vc-ui-ux-designer.md](.claude/agents/vc-ui-ux-designer.md) - Design-aware frontend implementation. Invoke for UI/UX tasks within execute phase.
+- [.claude/agents/vc-git-manager.md](.claude/agents/vc-git-manager.md) - Clean conventional commits. Invoke for git operations.
 
 Note: shared review methodology has been absorbed into the `vc-code-reviewer` agent prompt. Route to the agent directly instead of a separate review-owner workflow when the agent is the appropriate path.
 

@@ -1,5 +1,5 @@
 ---
-name: vc:debug
+name: vc-debug
 description: "Debug systematically with root-cause analysis before fixes. Use for bugs, test failures, unexpected behavior, performance issues, CI failures, or system investigation."
 languages: all
 argument-hint: "[error or issue description]"

@@ -4,7 +4,7 @@ description: Create or update implementation plans in the repo's SIMPLE or COMPL
 trigger_keywords: plan, create plan, write plan, generate spec, plan artifact
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

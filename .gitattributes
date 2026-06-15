@@ -1,0 +1,9 @@
+# Force LF on text files to prevent CRLF corruption on Windows checkout
+* text=auto
+*.sh text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf

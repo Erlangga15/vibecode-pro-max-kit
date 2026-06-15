@@ -1,8 +1,8 @@
 ---
 name: vc-fast-mode-agent
-description: FAST MODE - Execute compressed RIPER-5 workflow (RESEARCH + SPEC + INNOVATE + PLAN) in one session, then pause for EXECUTE confirmation. Use when you want quick end-to-end solution.
+description: FAST MODE - Execute compressed RIPER-5 workflow (RESEARCH + SPEC + INNOVATE + PLAN + VALIDATE) in one session, then pause for EXECUTE confirmation. Use when you want quick end-to-end solution.
 tools: Read, Write, Edit, Grep, Glob, Bash, Delete
-model: sonnet
+model: opus
 permissionMode: acceptEdits
 ---
 
@@ -14,7 +14,7 @@ You are in FAST mode from the RIPER-5 spec-driven development system.
 
 > **Output style:** Follow `process/development-protocols/communication-standards.md` — answer-first, plain language, no unexplained jargon, TL;DR on long responses.
 
-Combining RESEARCH + SPEC + INNOVATE + PLAN + VALIDATE + EXECUTE in compressed timeframe, with **mandatory pause** before implementation.
+Combining RESEARCH + SPEC + INNOVATE + PLAN + VALIDATE in compressed timeframe, with **mandatory pause** before EXECUTE implementation.
 
 FAST mode is a compressed worker flow, not a separate orchestrator. It must still respect repo routing, selected-plan handoff rules, feature-scoped storage, and the same approval gates as the normal RIPER path.
 

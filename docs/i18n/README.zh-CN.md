@@ -131,7 +131,7 @@ your-project/
 │   │   ├── vc-security/
 │   │   ├── vc-scout/
 │   │   └── ...
-│   └── hooks/               # 🪝 7 个生命周期 hooks
+│   └── hooks/               # 🪝 10 个生命周期 hooks
 │       ├── privacy-block.cjs
 │       ├── scout-block.cjs
 │       └── ...
@@ -443,13 +443,13 @@ agent 调研你的技术栈，写一份你可以 review 的架构方案，带测
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🪝</h1>
-<h3>7</h3>
+<h3>10</h3>
 <strong>生命周期 Hook</strong><br>
 <sub>执行前后的防护栏和上下文注入</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>📜</h1>
-<h3>6</h3>
+<h3>8</h3>
 <strong>开发协议</strong><br>
 <sub>跨所有工具共享的工作流规则</sub>
 </td>
@@ -471,9 +471,9 @@ agent 调研你的技术栈，写一份你可以 review 的架构方案，带测
 <tr>
 <td align="center" width="50%" valign="top">
 <h1>🌍</h1>
-<h3>6</h3>
+<h3>10</h3>
 <strong>种语言</strong><br>
-<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Português</sub>
+<sub>EN · 中文 · 日本語 · 한국어 · Tiếng Việt · Português · Español · Deutsch · Français · हिन्दी</sub>
 </td>
 <td align="center" width="50%" valign="top">
 <h1>⚡</h1>
@@ -570,7 +570,7 @@ process/context/
 | 多工具支持 | 7 个工具，通过 AGENTS.md + 原生支持 | Claude Code 插件 | 14 个运行时 | 1 个工具 |
 | 自动进化的 context | 领域路由的 context groups，每次功能完成后更新 | 插件记忆 | 磁盘持久化状态 | 手动 |
 | 团队协作 | 共享的 spec、计划和 review 产物 | 单人 | 单人 | 单人 |
-| Skills 系统 | 32 个自动发现，每次 prompt 关键词匹配 | 86 个可组合 skills | Meta-prompting | 23 个角色工具 |
+| Skills 系统 | 33 个自动发现，每次 prompt 关键词匹配 | 86 个可组合 skills | Meta-prompting | 23 个角色工具 |
 | 多阶段程序 | Umbrella plan + 逐阶段执行循环，带回归检查 | 单任务 | 单任务 | 单任务 |
 | 质量流水线 | 6 步链（code-review → test → simplify → security → audit → commit） | 每个 skill 独立质量 | 无自动链 | 无自动链 |
 | 安装 | 30 秒 `curl` 安装 + 自动设置 | 插件市场 | npx 一行命令 | git clone |
@@ -646,8 +646,10 @@ orchestrator **自己从不干活**——它只负责路由、监控和管理阶
 | 阶段 | 做什么 | 你说 |
 |-------|-------------|---------|
 | 🔍 **RESEARCH** | 只读的信息收集——代码库 + 网络 | *(功能请求自动触发)* |
+| 📝 **SPEC** | 供用户审查的产品需求文档 | `go` 或 `ENTER SPEC MODE` |
 | 💡 **INNOVATE** | 探索 2-3 种方案及其 trade-off | `go` |
 | 📋 **PLAN** | 写一份你可以 review 的详细 spec | `go` |
+| ✅ **VALIDATE** | 将计划转化为可执行契约；关卡必须通过 | `ENTER VALIDATE MODE` |
 | ⚡ **EXECUTE** | 严格按计划实现 | `ENTER EXECUTE MODE` |
 | 🧠 **UPDATE PROCESS** | 捕获经验，更新 context，归档计划 | *(非平凡工作后建议执行)* |
 
@@ -897,15 +899,15 @@ process/
 │   │   └── webhooks_PLAN_28-05-26.md
 │   ├── completed/               # ✅ 归档的计划（可搜索的历史）
 │   ├── backlog/                 # 📌 延后的工作
-│   ├── reports/                 # 📄 跨功能的报告
-│   └── references/              # 📚 调研输出
+│   ├── reports/                 # 📄 （已废弃——产物放在任务文件夹内）
+│   └── references/              # 📚 （已废弃——产物放在任务文件夹内）
 └── features/
     └── billing/                 # 🏷️ 功能级别（5+ 产物时创建）
         ├── active/
         ├── completed/
         ├── backlog/
-        ├── reports/
-        └── references/
+        ├── reports/             # 📄 （已废弃——产物放在任务文件夹内）
+        └── references/          # 📚 （已废弃——产物放在任务文件夹内）
 ```
 
 ---
@@ -1025,8 +1027,8 @@ process/features/{feature}/
 ├── active/       # 📋 正在进行的计划
 ├── completed/    # ✅ 归档的计划（可搜索的决策历史）
 ├── backlog/      # 📌 延后的工作（agent 创建新计划前会先检查这里）
-├── reports/      # 📄 执行报告、复盘、验证结果
-└── references/   # 📚 为未来决策提供参考的调研输出
+├── reports/      # 📄 （已废弃——产物放在任务文件夹内）
+└── references/   # 📚 （已废弃——产物放在任务文件夹内）
 ```
 
 <br>
@@ -1044,10 +1046,10 @@ process/features/{feature}/
 
 <br>
 
-### 12 个 Agents
+### 15 个 Agents
 
 <details>
-<summary>点击展开 agent 列表（12 个 agents）</summary>
+<summary>点击展开 agent 列表（15 个 agents）</summary>
 
 <br>
 
@@ -1056,11 +1058,14 @@ process/features/{feature}/
 | Agent | 职责 |
 |-------|------|
 | 🔍 `vc-research-agent` | 代码库 + 网络调研，只读。内置矛盾追踪 |
+| 📝 `vc-spec-agent` | INNOVATE 前的产品需求文档。产出 `*_SPEC_*.md` |
 | 💡 `vc-innovate-agent` | 头脑风暴 2-3 种方案。进入 PLAN 前必须产出决策总结 |
 | 📋 `vc-plan-agent` | 写 spec，带反自圆其说防护。"我已经知道怎么做"不算一个计划 |
+| ✅ `vc-validate-agent` | 将计划转化为可执行契约（V1–V7 关卡）。关卡：PASS/CONDITIONAL/BLOCKED |
 | ⚡ `vc-execute-agent` | 按计划实现。50% 进度检查、偏离协议、自审查 |
 | ⏩ `vc-fast-mode-agent` | 压缩的 RESEARCH→INNOVATE→PLAN，带强制安全暂停 |
 | 🧠 `vc-update-process-agent` | 7 阶段强制检查清单，包含陈旧产物扫描 |
+| 🔧 `vc-quick-fix-agent` | QUICK FIX 通道：单个低风险编辑 + 范围内检查，无需计划/验证 |
 
 <br>
 
@@ -1079,16 +1084,16 @@ process/features/{feature}/
 
 <br>
 
-### 31 个 Skills（自动发现）
+### 33 个 Skills（自动发现）
 
 <details>
 <summary>点击展开 skill 列表（33 个 skills）</summary>
 
 <br>
 
-**🔧 Contract skills** — `vc-generate-plan` · `vc-generate-context` · `vc-audit-context` · `vc-audit-plans` · `vc-audit-vc` · `vc-setup` · `vc-update` · `vc-publish`
+**🔧 Contract skills** — `vc-generate-plan` · `vc-generate-context` · `vc-generate-spec` · `vc-generate-closeout` · `vc-generate-phase-program` · `vc-audit-context` · `vc-audit-plans` · `vc-audit-vc` · `vc-setup` · `vc-update` · `vc-publish`
 
-**🧠 规划** — `vc-predict`（5 人格辩论） · `vc-scenario`（12 维度边界情况） · `vc-sequential-thinking` · `vc-problem-solving`
+**🧠 规划与验证** — `vc-predict`（5 人格辩论） · `vc-scenario`（12 维度边界情况） · `vc-sequential-thinking` · `vc-problem-solving` · `vc-feasibility-test`（实证探测） · `vc-risk-evidence-pack` · `vc-test-coverage-plan` · `vc-validate-findings` · `vc-agent-strategy-compare` · `vc-intent-clarify` · `vc-plan-discovery` · `vc-review-situation`
 
 **🐛 调试 & 安全** — `vc-debug` · `vc-security`（STRIDE + OWASP + 自动修复） · `vc-autoresearch`（自主优化）
 
@@ -1096,13 +1101,13 @@ process/features/{feature}/
 
 **🎨 前端** — `vc-frontend-design` · `vc-agent-browser` · `vc-web-testing`
 
-**🚀 自主运行** — `vc-autopilot` · `vc-autoresearch` · `vc-intent-clarify` · `vc-agent-strategy-compare` · `vc-review-situation` · `vc-plan-discovery` · `vc-generate-closeout` · `vc-risk-evidence-pack` · `vc-feasibility-test` · `vc-generate-spec`
+**⚙️ 自动化** — `vc-autopilot`（自主 RIPER-5 运行） · `vc-context-discovery`
 
 </details>
 
 <br>
 
-### 🪝 7 个 Hooks
+### 🪝 10 个 Hooks
 
 | Hook | 做什么 |
 |------|-------------|
@@ -1113,6 +1118,9 @@ process/features/{feature}/
 | ✨ **Edit quality** | 5+ 次编辑后提醒跑 code-simplifier（非阻塞、节流） |
 | 📛 **Descriptive naming** | 每次 Write 时检查语言感知的文件命名规范 |
 | 📊 **Usage tracking** | 会话指标和 token 使用感知 |
+| 📋 **Plan structure check** (`post-write-plan-check.mjs`) | 每次向 `*_PLAN_*.md` 文件写入时验证计划产物结构 |
+| 🧹 **Commit message lint** (`post-commit-lint.mjs`) | 每次 `git commit` Bash 调用时检查 conventional-commits 前缀 |
+| 🔍 **Stop validator sweep** (`stop-validator-sweep.cjs`) | 当 agent 会话停止时运行核心框架验证器 |
 
 <br>
 
@@ -1121,9 +1129,9 @@ process/features/{feature}/
 ```
 your-project/
 ├── .claude/
-│   ├── agents/              # 🤖 12 个 agent 定义 (.md)
-│   ├── skills/              # ⚡ 31 个 skill 模块 (每个是含 SKILL.md 的目录)
-│   └── hooks/               # 🪝 7 个生命周期 hooks (.cjs)
+│   ├── agents/              # 🤖 15 个 agent 定义 (.md)
+│   ├── skills/              # ⚡ 33 个 skill 模块 (每个是含 SKILL.md 的目录)
+│   └── hooks/               # 🪝 10 个生命周期 hooks (.cjs and .mjs)
 ├── .codex/
 │   └── agents/              # 🔄 为 Codex 兼容性镜像
 ├── .agents/
@@ -1153,7 +1161,7 @@ Run vc-update
 
 ## 贡献
 
-欢迎贡献！详见 [CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)。
+欢迎贡献！详见 [CONTRIBUTING.md](../../CONTRIBUTING.md)。
 
 <br>
 
@@ -1174,9 +1182,7 @@ Run vc-update
 
 ### 🙏 致谢
 
-本项目受益于 [@mrgoonie](https://github.com/mrgoonie) 的 [ClaudeKit](https://claudekit.cc/?ref=OEOM7R7G)——尤其是 `ck:xia` 等技能给了我们启发。
-
-区别在于：vibecode-pro-max-kit 专注于规格驱动的开发框架和自我改进的上下文组织，不会用 80+ 个技能让你应接不暇。更少工具，更多结构。
+vibecode-pro-max-kit 专注于规格驱动的开发框架和自我改进的上下文组织，不会用 80+ 个技能让你应接不暇。更少工具，更多结构。
 
 ---
 

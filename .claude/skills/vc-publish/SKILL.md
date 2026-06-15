@@ -5,7 +5,7 @@ trigger_keywords: publish kit, push harness, release kit, update remote
 layer: contract
 metadata:
   author: vibecode
-  version: "2.0.0"
+  version: "3.0.0"
 ---
 
 # vc-publish
@@ -54,7 +54,7 @@ node .claude/skills/vc-audit-context/scripts/generate-skills-catalog.mjs --write
 ```
 This ensures `process/context/generated-skills-catalog.json` is current before it is copied into the kit repo.
 
-### Step 3: Resolve Both File Sets
+### Step 3: Resolve Kit File Set
 
 7. Run the resolver against the **kit repo** to get the kit file list:
    ```bash
@@ -62,21 +62,35 @@ This ensures `process/context/generated-skills-catalog.json` is current before i
    ```
    Extract `files` (kit managed files) and `kitOnly` (kit-exclusive files).
 
-8. Run the resolver against the **dev repo** to get the dev file list:
-   ```bash
-   node <kitRepoPath>/resolve-manifest.mjs --root <devRepoRoot> --json
-   ```
-   Extract `files` (dev managed files).
-
-   **Note:** The resolver uses the manifest from the `--root` directory. Since the dev repo has a copy of `vc-manifest.json`, the resolver works against it. If the dev repo doesn't have the resolver script, copy it from the kit repo first or use the kit repo's copy with `--root` pointing to the dev repo.
+   **Note:** `resolve-manifest.mjs` reads `vc-manifest.json` from its `--root` directory and also scans files from that same root. `vc-manifest.json` is NOT installed into dev/user projects by `install.sh`, so the resolver must always be pointed at the kit repo checkout (which does have it). There is no separate dev-repo resolver call — the dev-side file comparison happens inside `compute-sync-plan.mjs` in Step 4.
 
 ### Step 4: Compute Diff
 
-9. Compare the two resolved file sets:
-   - Files in dev `files` but NOT in kit `files`: **new** (will be added to kit).
-   - Files in kit `files` but NOT in dev `files`: **removed** (will be removed from kit).
-   - Files in both: compare content via `diff`. Classify as **modified** or **unchanged**.
-   - `merge` files (CLAUDE.md, AGENTS.md): always flag for content review regardless of diff status.
+9. **Computation via `compute-sync-plan.mjs`:** Use the shared computation core to produce the diff between the dev repo's managed files and the kit repo's current managed files.
+
+   > **Direction note:** `compute-sync-plan.mjs` loads `vc-manifest.json` from `--kit-root` and runs the resolver with `--root <kit-root>`. Since `vc-manifest.json` lives in the kit repo (not the dev repo), `--kit-root` must always be the kit repo checkout. `--root` is the dev repo (the project being compared). This is the same direction as a normal install — vc-publish uses it to see what a fresh install FROM dev INTO the kit would change.
+
+   ```bash
+   # --root = dev repo (the "project" being compared against the kit source)
+   # --kit-root = kit repo (where vc-manifest.json lives; source of truth for file lists)
+   # --resolver overrides the resolver path because compute-sync-plan
+   # would otherwise look for resolve-manifest.mjs inside --kit-root,
+   # which IS the kit repo here, so --resolver is optional but explicit for clarity.
+   node <kitRepoPath>/compute-sync-plan.mjs \
+     --root <devRepoRoot> \
+     --kit-root <kitRepoPath> \
+     --resolver <kitRepoPath>/resolve-manifest.mjs \
+     --json
+   ```
+
+   Parse the JSON output: `{ toAdd, toModify, toDelete, toPreserve, staleWarnings }`.
+   - `toAdd` — files to copy from dev to kit (present in dev, not yet in kit).
+   - `toModify` — files to overwrite in kit (tracked in both, content differs).
+   - `toDelete` — files to remove from kit (no longer in dev managed set).
+   - `toPreserve` — files to leave untouched (merge/copyIfMissing survivors, unchanged files).
+   - `staleWarnings` — paths that failed the namespace guard — print to user; do NOT delete.
+
+   The ownedPaths for the publish direction are the dev repo's resolved `ownedPaths`. CLAUDE.md and AGENTS.md are always in the `merge` category — they require special stripping regardless of diff status (see Step 7).
 
 ### Step 5: Print Diff Summary
 
@@ -192,7 +206,7 @@ Version bump semantics:
     **Check (c) -- README badge counts:** Verify the kit README.md badge counts match actual agent and skill counts:
     ```bash
     actual_agents=$(ls <kitRepoPath>/.claude/agents/*.md | wc -l | tr -d ' ')
-    actual_skills=$(ls <kitRepoPath>/.claude/skills/ | wc -l | tr -d ' ')
+    actual_skills=$(ls -d <kitRepoPath>/.claude/skills/vc-*/ | wc -l | tr -d ' ')
     readme_agents=$(grep -oE '[0-9]+-Agents' <kitRepoPath>/README.md | grep -oE '[0-9]+')
     readme_skills=$(grep -oE '[0-9]+-Skills' <kitRepoPath>/README.md | grep -oE '[0-9]+')
     echo "Agents: actual=$actual_agents badge=$readme_agents"
@@ -214,7 +228,7 @@ Version bump semantics:
     - Revert the changes in the kit repo (`git -C <kitRepoPath> checkout .`).
     - STOP and report the leak. Do NOT commit or push.
 
-### Step 9: Commit and Tag
+### Step 9a: Commit and Tag
 
 15. In the kit repo. If the version was already at the target (skip-bump path from Step 2): use `tag-as-is` and commit with the existing version number. Otherwise: bump the version in `vc-manifest.json` and commit with the new version.
 
@@ -225,9 +239,25 @@ git commit -m "Release vX.Y.Z"
 git tag vX.Y.Z
 ```
 
+### Step 9b: STOP — Explicit Push Approval (separate from Step 6 confirm)
+
+Leak detection passed. The commit and tag are ready locally. Before running `git push`, you **MUST** stop and get explicit user approval:
+
+> "Leak detection passed. The commit is ready locally (`git log --oneline -1` shows the new commit).
+> **Type 'push' to publish to remote, or 'abort' to keep the commit local.**"
+
+Do NOT run `git push` or `git push --tags` until the user types 'push' (or a clear affirmative). This is a **separate gate** from the publish-confirm at Step 6 — even if the user approved publishing in Step 6, they must re-confirm before the actual remote push.
+
+If the user says 'abort':
+- The local commit and tag are preserved.
+- Print: "Commit and tag preserved locally. Run `git push origin main && git push --tags` when ready."
+- Stop.
+
+Only on explicit 'push': proceed to Step 10 (`git push origin main && git push --tags`).
+
 ### Step 10: Push
 
-16. Push to remote:
+16. Push to remote (only after Step 9b approval):
 
 ```bash
 git push origin main && git push --tags
@@ -279,7 +309,7 @@ Release:       https://github.com/<owner>/<repo>/releases/tag/v2.2.0
 ## Key Changes from v1.0
 
 - **No manifest array maintenance.** The glob patterns in `include`/`exclude`/`kitOnly` are stable. Adding a new skill or agent requires zero manifest edits. The only manifest change at publish time is the version bump.
-- **Resolver-driven diffing.** Both repos are resolved through the same `resolve-manifest.mjs` script, ensuring consistent file sets.
+- **Resolver-driven diffing.** The kit repo is resolved via `resolve-manifest.mjs` (which requires `vc-manifest.json` in its `--root`). The dev-side file comparison is handled inside `compute-sync-plan.mjs`, which reads the manifest from `--kit-root` (always the kit checkout). Dev repos do not carry `vc-manifest.json`.
 - **No `managed`/`managedDirs` arrays to update.** The old workflow of adding new files to these arrays is eliminated.
 
 ## Rules
@@ -288,6 +318,7 @@ Release:       https://github.com/<owner>/<repo>/releases/tag/v2.2.0
 - **NEVER** copy project-specific files: `process/context/all-context.md` (with real content), `process/features/*`, `process/general-plans/*` (with real plans)
 - **ALWAYS** verify no project-specific content leaked before committing (Step 8)
 - **ALWAYS** show the diff summary before publishing (Step 5-6)
+- **NEVER auto-push.** `git push` must be preceded by a separate explicit 'push' confirmation (Step 9b), distinct from the publish-confirm at Step 6. This rule holds even when `VC_KIT_SOURCE` is a local path.
 - CLAUDE.md and AGENTS.md require special handling -- never copy the development repo's project-specific versions directly
 - Kit repo checkout path is stored in `.vc-publish-config` (add to `.gitignore`)
 - The only manifest edit at publish time is the version bump -- glob patterns are stable

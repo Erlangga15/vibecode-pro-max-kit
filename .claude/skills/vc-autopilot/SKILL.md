@@ -1,11 +1,11 @@
 ---
 name: vc-autopilot
-description: "Emit and validate the provisional goal block artifact for an Autopilot Mode session. Owns the 9-field provisional block format (SESSION GOAL / ENTRY PHASE / REMAINING PHASES / CLARIFICATIONS LOCKED / EXECUTE CONSENT / DECISION POLICY / HARD STOPS / TEST GATES / START), resume detection from a pasted goal block, and the disk-persistence rule ({slug}_AUTOPILOT_GOAL_{date}.md in the task folder)."
+description: "Emit and validate the provisional goal block for Autopilot Mode. Owns the 9-field format and resume detection from a pasted goal block."
 argument-hint: "[task description or pasted goal block for resume detection]"
 trigger_keywords: autopilot, run autopilot, full autopilot, autonomous mode, goal block, provisional goal, AUTOPILOT_ACTIVATED, resume autopilot
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

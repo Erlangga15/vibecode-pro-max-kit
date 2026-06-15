@@ -5,7 +5,7 @@ argument-hint: "[domain] [corpus path(s)] [verify: command] [max_iterations: N]"
 trigger_keywords: autoresearch, harden spec, fix all errors, improve coverage, iterative improvement, gap loop
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

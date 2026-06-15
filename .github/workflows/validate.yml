@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Validate agent parity
         run: node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
@@ -62,28 +62,26 @@ jobs:
       - name: Validate all context
         run: node .claude/skills/vc-generate-context/scripts/validate-all-context.mjs
 
+      - name: Validate skill invocation wiring
+        run: node .claude/skills/vc-audit-vc/scripts/validate-skill-invocation-wiring.mjs
+
+      - name: Validate protocol discovery
+        run: node .claude/skills/vc-audit-context/scripts/validate-protocol-discovery.mjs
+
+      - name: Validate skill keywords
+        run: node .claude/skills/vc-audit-context/scripts/validate-skill-keywords.mjs
+
       - name: Validate plan artifacts (if any)
         run: |
           PLANS=$(find process/general-plans/active process/features/*/active -name '*_PLAN_*' -type f 2>/dev/null)
           if [ -n "$PLANS" ]; then
-            echo "$PLANS" | xargs -I {} node .claude/skills/vc-audit-plans/scripts/validate-plan-artifact.mjs {}
+            echo "$PLANS" | xargs -I {} node .claude/skills/vc-generate-plan/scripts/validate-plan-artifact.mjs {}
           else
             echo "No active plan artifacts found, skipping."
           fi
 
       - name: Check for personal path leaks
-        run: |
-          if grep -rn '/Users/\|/home/\|C:\\Users\\' \
-            --include='*.md' --include='*.yml' --include='*.yaml' \
-            --include='*.json' --include='*.mjs' --include='*.js' \
-            --include='*.ts' \
-            --exclude-dir=node_modules --exclude-dir=.git \
-            . ; then
-            echo "::error::Personal paths detected in repository files"
-            exit 1
-          else
-            echo "No personal path leaks found."
-          fi
+        run: node .claude/skills/vc-audit-vc/scripts/validate-kit-portability.mjs
 
       - name: Lint Markdown (non-blocking)
         run: npx markdownlint-cli2 '**/*.md' '#node_modules' || true

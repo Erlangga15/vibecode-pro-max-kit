@@ -11,8 +11,6 @@
 
 Obrigado pelo interesse em contribuir com o vibecode-pro-max-kit! Esse projeto oferece um harness de agente pronto pra uso para Claude Code e Codex, e contribuições de todo mundo são bem-vindas.
 
-Ao participar deste projeto, você concorda em seguir nosso [Código de Conduta](../../CODE_OF_CONDUCT.md).
-
 ---
 
 ## Canais de Comunicação

@@ -5,7 +5,7 @@ argument-hint: "[blast radius description or plan file path]"
 trigger_keywords: test coverage plan, test tiers, blast radius coverage, gap resolution, TDD plan
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

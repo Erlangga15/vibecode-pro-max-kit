@@ -6,7 +6,7 @@ metadata:
   node_type: memory
   type: reference
 ---
-# Duma Neobrutalist Redesign - Plan
+# MyApp Neobrutalist Redesign - Plan
 
 **Date:** 26-11-25  
 **Complexity:** Simple  
@@ -14,7 +14,7 @@ metadata:
 
 ## Overview
 
-Rebuild the Duma social activity discovery app with identical features and mock data, but redesigned with a neobrutalist + Gumroad minimalist aesthetic (rounded, easy on the eyes, modern, friendly, creative, cool). Update tech stack to pnpm, Next.js App Router, Tailwind CSS 4, and latest React Router + React Query patterns.
+Rebuild the MyApp social activity discovery app with identical features and mock data, but redesigned with a neobrutalist + Gumroad minimalist aesthetic (rounded, easy on the eyes, modern, friendly, creative, cool). Update tech stack to pnpm, Next.js App Router, Tailwind CSS 4, and latest React Router + React Query patterns.
 
 ## Quick Links
 
@@ -35,7 +35,7 @@ Rebuild the Duma social activity discovery app with identical features and mock 
 ## Goals and Success Metrics
 
 **Goals:**
-- Replicate all features from original Duma app (SwipeFeed, Activity Cards, Drawers, My Activities, Hosted Activities, Profile, Chat, Bottom Nav)
+- Replicate all features from original MyApp (SwipeFeed, Activity Cards, Drawers, My Activities, Hosted Activities, Profile, Chat, Bottom Nav)
 - Implement neobrutalist + Gumroad minimalist design: rounded corners, bold colors, friendly typography, creative layouts
 - Migrate to modern tech stack: pnpm, Next.js App Router, Tailwind CSS 4, latest React Router/Query
 - Deliver fully functional prototype with all mock data working
@@ -84,7 +84,7 @@ After completing all implementation steps, verify the following:
 (tier: fully-automated | hybrid | agent-probe — assign per item above)
 
 ### Expected Outcome
-- Fully functional Duma clone with neobrutalist design
+- Fully functional MyApp clone with neobrutalist design
 - All mock data rendering correctly
 - Smooth navigation and animations
 - No console errors
@@ -221,7 +221,7 @@ After completing all implementation steps, verify the following:
 ## Implementation Checklist
 
 1. **Initialize Next.js Project with pnpm**
-   - Create new Next.js project: `pnpm create next-app@latest duma-redesign --typescript --tailwind --app --no-src-dir`
+   - Create new Next.js project: `pnpm create next-app@latest myapp-redesign --typescript --tailwind --app --no-src-dir`
    - Verify pnpm is installed and working
    - Confirm App Router structure exists (`app/` directory)
 

@@ -1,10 +1,12 @@
 ---
-name: vc:agent-browser
+name: vc-agent-browser
 description: AI-optimized browser automation CLI with context-efficient snapshots. Use for long autonomous sessions, self-verifying workflows, video recording, and cloud browser testing (Browserbase).
 license: Apache-2.0
 argument-hint: "[url or task]"
+trigger_keywords: browser, screenshot, scrape, automation, web automation, agent-browser, browserbase, cloud browser, headless, playwright, snapshot
+layer: helper
 metadata:
-  author: claudekit
+  author: vibecode-pro-max-kit
   version: "1.0.0"
 ---
 

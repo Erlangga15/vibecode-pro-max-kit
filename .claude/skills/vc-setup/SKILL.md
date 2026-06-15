@@ -1,7 +1,7 @@
 ---
 name: vc-setup
 description: Interactive harness setup for any project. Detects stack, scaffolds process dirs, deep-scans the codebase, populates context. Works on fresh and existing projects — always asks before reorganizing.
-trigger_keywords: seed, harness, bootstrap, new project, scaffold, setup
+trigger_keywords: seed, harness setup, bootstrap, new project, scaffold, setup
 layer: helper
 metadata:
   author: vibecode
@@ -10,7 +10,7 @@ metadata:
 
 # VibeCo Agent Harness Setup
 
-> **Output style:** Follow `process/development-protocols/communication-standards.md` — answer-first, plain language, no unexplained jargon, TL;DR on long responses.
+> **Output style:** Use BLUF (answer first), plain language, no unexplained jargon, TL;DR on long responses. Full rules in `process/development-protocols/communication-standards.md` once installed — on first run that file may not exist yet, so follow this inline rule instead.
 
 Interactive setup for the agent development harness. Works on fresh projects and existing projects with pre-existing `.claude/` or `process/` configs.
 
@@ -24,7 +24,13 @@ CLAUDE.md and AGENTS.md are managed protocol files (orchestrator, RIPER-5 method
 
 ## Prerequisites
 
-- The target repo should have a `package.json` (or equivalent project manifest).
+- The target repo should have a project manifest. Detection order:
+  1. `package.json` — Node/Bun/Deno projects (JS/TS)
+  2. `pyproject.toml` or `requirements.txt` — Python projects
+  3. `go.mod` — Go projects
+  4. `Gemfile` — Ruby projects
+  5. `Cargo.toml` — Rust projects
+  6. None found — ask the user: "What language/runtime does this project use? I'll adapt the setup to match."
 - That's it. The skill handles the rest.
 
 ## Workflow
@@ -167,8 +173,11 @@ Create the `process/` directory with seed files and instructional content.
 | `process/plans/` exists, `process/general-plans/` does not | Move `process/plans/*` to `process/general-plans/active/`, then remove empty `process/plans/` |
 | `process/reports/` exists at top level | Move `process/reports/*` to `process/general-plans/reports/`, then remove empty `process/reports/` |
 | `process/skills/` exists at top level | Move `process/skills/*` to `process/general-plans/backlog/`, then remove empty `process/skills/` |
-| Example PRDs at old locations (e.g. `process/context/example-*.md` or under `process/context/planning/`) that are not in `process/development-protocols/references/` | Move to `process/development-protocols/references/` |
+| Example PRDs at old locations (e.g. `process/context/example-*.md` or under `process/context/planning/` or under `process/development-protocols/references/`) | Move to `.claude/skills/vc-generate-plan/references/` |
 | process/context/backlog.md at top of context/ | Move to `process/general-plans/backlog/backlog.md` |
+| Flat `*_PLAN_*.md` files directly in `process/general-plans/active/` or `process/features/*/active/` (old pre-v3 layout) | Create a `{slug}_{date}/` task subfolder and move the plan file inside it. Completed plans go to `completed/{slug}_{date}/` instead. |
+| `process/general-plans/reports/`, `process/general-plans/references/`, or `process/features/*/reports/`, `process/features/*/references/` sibling dirs | **Not auto-migrated.** Show the user a list of what is in them and recommend moving contents into the nearest task folder manually. Leave in place if the user prefers — they are read-only legacy artifacts and do not break the harness. |
+| Feature folder missing `active/` subdirectory (e.g. `process/features/{name}/` exists but has no `active/`, `completed/`, or `backlog/` under it) | Create `active/`, `completed/`, `backlog/` under that feature folder, seed each from the `_feature-template/` `_GUIDE.md`, and print every creation. |
 
 **Migration rules:**
 - Never overwrite existing files at the destination. If a file with the same name exists, keep both (rename the migrated copy with a `-migrated` suffix).
@@ -228,11 +237,13 @@ Verify the setup is complete, correct, and populated with real content.
    ```bash
    node .claude/skills/vc-audit-context/scripts/generate-skills-catalog.mjs --write
    ```
-   This file is required for `discover-skills.mjs` (Routing Step 0) to work correctly. Fresh installs that copy this file from the kit manifest include do not need this step, but if the file is missing for any reason (missing manifest include, partial install), generate it explicitly.
+   This file is required for `discover-skills.mjs` (Routing Step 0) to work correctly. Fresh installs that copy this file from the kit manifest include do not need this step, but if the file is missing for any reason (missing manifest include, partial install), generate it explicitly. Note: `generate-skills-catalog.mjs` (and its shared utils) works on non-git projects — it falls back to `process.cwd()` when `git rev-parse` is unavailable.
 6. Report any issues found.
 7. Suggest running validation scripts if they exist in the target repo:
    - `node .claude/skills/vc-generate-context/scripts/validate-all-context.mjs`
    - `node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs`
+
+   **Validator cwd discipline:** Run every validator from the project root: `cd {project_root} && node .claude/skills/...`. The scripts resolve the project via `git rev-parse --show-toplevel`; running from a parent directory resolves the wrong root and produces misleading results.
 
 **Present the final summary** to the user: what was set up, what is ready to use, and recommended next steps (review context, start using the harness).
 

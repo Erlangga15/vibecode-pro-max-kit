@@ -5,7 +5,7 @@ argument-hint: "[phase context description or fan-out task description]"
 trigger_keywords: execution strategy, parallel agents, strategy comparison, agent count, fan-out recommendation
 layer: contract
 metadata:
-  author: flowser
+  author: vibecode-pro-max-kit
   version: "1.2.0"
 ---
 
@@ -31,7 +31,7 @@ Concrete rules:
 - **Dynamic workflows**: pass `model: 'sonnet'` on `agent()` calls by default; pass `model: 'opus'` only on the execution stage that writes code or runs builds.
 - **Parallel subagents**: fan-out investigation/review subagents are sonnet; only an implementing subagent is opus.
 
-Rationale: opus is reserved for the one place judgment-under-execution materially changes code quality. Everything upstream is sonnet-cheap without quality loss, and this keeps fan-outs (which multiply agent count) on the cost-efficient tier. This mirrors the live agent frontmatter: `vc-execute-agent` and `vc-fast-mode-agent` are opus; every other vc-agent is sonnet.
+Rationale: opus is reserved for the one place judgment-under-execution materially changes code quality. Everything upstream is sonnet-cheap without quality loss, and this keeps fan-outs (which multiply agent count) on the cost-efficient tier. This mirrors the live agent frontmatter: `vc-execute-agent`, `vc-fast-mode-agent`, and `vc-quick-fix-agent` are opus; every other vc-agent is sonnet.
 
 ---
 
