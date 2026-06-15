@@ -193,10 +193,17 @@ node "$VC_UPDATE_TMPDIR/compute-sync-plan.mjs" \
     const plan = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
     const fs = require('fs'), path = require('path');
     const root = process.env.PROJECT_ROOT;
+    const backupDir = path.join(root, '.vibecode-backup');
+    // Rotate any prior backup so re-runs never silently overwrite it
+    if (fs.existsSync(backupDir) && fs.readdirSync(backupDir).length > 0) {
+      const rotated = path.join(root, '.vibecode-backup-' + Math.floor(Date.now() / 1000));
+      fs.renameSync(backupDir, rotated);
+      console.log('Existing backup rotated to ' + path.relative(root, rotated) + '/');
+    }
     for (const rel of [...plan.toModify, ...plan.toDelete]) {
       const src = path.join(root, rel);
       if (!fs.existsSync(src)) continue;
-      const dst = path.join(process.env.PROJECT_ROOT, '.vibecode-backup', rel);
+      const dst = path.join(backupDir, rel);
       const stat = fs.statSync(src);
       if (stat.isDirectory()) {
         fs.cpSync(src, dst, { recursive: true });
@@ -209,7 +216,7 @@ node "$VC_UPDATE_TMPDIR/compute-sync-plan.mjs" \
 # Note: this backup step assumes a POSIX shell. On Windows, skip or adapt it — /dev/stdin is unavailable.
 ```
 
-(This preserves the pre-update versions of both overwritten and removed files, so any content is recoverable from `.vibecode-backup/`.)
+(This preserves the pre-update versions of both overwritten and removed files, so any content is recoverable from `.vibecode-backup/`. If a `.vibecode-backup/` directory already exists from a prior run, it is rotated to a timestamped name (`.vibecode-backup-{unix-ts}/`) before the new backup is written, so earlier backups are never overwritten.)
 
 **Part B — Apply the full plan with the single mechanical command:**
 

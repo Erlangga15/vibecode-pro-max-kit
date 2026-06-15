@@ -137,6 +137,12 @@ HAS_EXISTING=false
 if [ -d ".claude" ] || [ -d ".codex" ] || [ -d ".agents" ] || [ -f "CLAUDE.md" ] || [ -f "AGENTS.md" ]; then
   HAS_EXISTING=true
   echo -e "  ${YELLOW}Existing setup detected.${NC} Backing up..."
+  # Rotate any prior backup so re-runs never silently overwrite it
+  if [ -d "$BACKUP_DIR" ] && [ -n "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
+    ROTATED_DIR="${BACKUP_DIR}-$(date +%s)"
+    mv "$BACKUP_DIR" "$ROTATED_DIR"
+    echo -e "  ${YELLOW}Existing backup rotated to ${CYAN}${ROTATED_DIR}/${NC}"
+  fi
   mkdir -p "$BACKUP_DIR"
   # Fix M7 (backup): use cp -f so re-runs overwrite read-only files from a prior backup
   chmod -R u+w "$BACKUP_DIR" 2>/dev/null || true
