@@ -132,9 +132,10 @@ A snapshot file written to the user project root after each install/update. Cont
 | Missing vc-manifest.json | Step 4 | Print "vc-manifest.json not found in remote", clean up, stop |
 | .vc-version missing | Step 2 | Not an error -- treat as `0.0.0` (first update) |
 | .vc-installed-files missing | Step 6 | `priorSnapshot` set to `[]` (no disk scan); no stale removal via snapshot path; `legacyDeletions` still applied; snapshot written at apply time |
-| Permission denied on copy | Step 10 | Print which file, suggest `chmod`, **continue** with remaining |
+| Permission denied on copy | Step 10 | Print which file + error, note original recoverable from `.vibecode-backup/`, **continue** with remaining |
 | Permission denied on delete | Step 10 | Print which file, suggest `chmod`, **continue** |
 | Symlink creation fails | Step 10 | Print error, suggest checking if target exists, **continue** |
+| Declared kit file missing from kit clone | Step 4 | `resolve-manifest` emits a `missingDeclared` list; `compute-sync-plan` prints a loud stderr warning and **preserves** any project copies that would have been deleted — prevents data loss from a partial/corrupt kit clone. Re-clone the kit to resolve. |
 
 ## Edge Cases
 

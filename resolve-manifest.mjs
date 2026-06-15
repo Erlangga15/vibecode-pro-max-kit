@@ -242,6 +242,13 @@ function matchesPatternList(filePath, patterns) {
   return false;
 }
 
+/**
+ * Returns true if a manifest entry string is an exact file path (no glob metacharacters).
+ */
+function isExactPath(entry) {
+  return !/[*?[\]{}]/.test(entry);
+}
+
 function resolveGlob() {
   const includePatterns = manifest.include || [];
   const excludePatterns = manifest.exclude || [];
@@ -287,6 +294,15 @@ function resolveGlob() {
   }
   copyIfMissingResolved.sort();
 
+  // Kit-integrity guard: collect exact declared paths that are absent on disk.
+  // Only EXACT paths (no glob metacharacters) are checked — a glob matching zero
+  // files is normal and is NOT flagged here.
+  const missingDeclared = [...new Set(
+    includePatterns
+      .filter(isExactPath)
+      .filter((p) => !fs.existsSync(path.join(rootDir, p)))
+  )].sort();
+
   if (jsonMode) {
     console.log(
       JSON.stringify(
@@ -299,6 +315,7 @@ function resolveGlob() {
           symlinks: symlinkMap,
           legacyDeletions: manifest.legacyDeletions || [],
           ownedPaths: [...new Set([...managedFiles, ...(manifest.legacyDeletions || [])])].sort(),
+          missingDeclared,
         },
         null,
         2,

@@ -60,6 +60,7 @@ export default function computeSyncPlan(opts) {
     mergeFiles = [],
     copyIfMissing = [],
     legacyDeletions = [],
+    missingDeclared = [],
   } = opts;
 
   // 1. Read prior .vc-installed-files snapshot
@@ -142,6 +143,19 @@ export default function computeSyncPlan(opts) {
     return { toAdd, toModify, toDelete, toPreserve, staleWarnings, aborted: true, abortReason: msg };
   }
 
+  // Kit-integrity guard: warn about declared kit files that were absent at resolution time.
+  // These are paths the manifest DECLARED as exact entries but that were missing on disk
+  // (partial/corrupt kit clone). Guard with || [] for backward-compat with older resolver output.
+  const missingDeclaredSet = new Set(missingDeclared || []);
+  if (missingDeclaredSet.size > 0) {
+    process.stderr.write(
+      `\nWARNING: Kit integrity check failed — the following declared kit files were not found on disk.\n` +
+      `The kit clone may be partial or corrupt. Re-clone the kit before updating.\n` +
+      `Missing declared kit files:\n` +
+      [...missingDeclaredSet].sort().map((p) => `  ${p}`).join('\n') + '\n\n'
+    );
+  }
+
   for (const rel of priorSnapshot) {
     if (ownedSet.has(rel)) {
       // Still in current ownedPaths — not stale
@@ -151,6 +165,17 @@ export default function computeSyncPlan(opts) {
     const projectFile = path.join(projectRoot, rel);
     if (!fileExists(projectFile)) {
       // Already gone — skip
+      continue;
+    }
+
+    // Kit-integrity guard: if this deletion candidate matches a declared kit file
+    // that was absent on disk at resolution time, preserve it instead of deleting.
+    // The kit clone is likely incomplete; deleting the project copy would be data loss.
+    if (missingDeclaredSet.has(rel)) {
+      staleWarnings.push(
+        `PRESERVED (kit integrity): '${rel}' was scheduled for deletion but is declared in the kit manifest and missing from the kit clone — preserved to avoid data loss. Re-clone the kit to get the correct version. Original is recoverable from .vibecode-backup/ if a backup was made.`
+      );
+      toPreserve.push(rel);
       continue;
     }
 
@@ -244,18 +269,30 @@ function applyPlan(plan, projectRoot, kitRoot, ownedPaths, version, managedFiles
   for (const rel of toAdd) {
     const src = path.join(kitRoot, rel);
     const dst = path.join(projectRoot, rel);
-    fs.mkdirSync(path.dirname(dst), { recursive: true });
-    fs.copyFileSync(src, dst);
-    console.log(`  added: ${rel}`);
+    try {
+      fs.mkdirSync(path.dirname(dst), { recursive: true });
+      fs.copyFileSync(src, dst);
+      console.log(`  added: ${rel}`);
+    } catch (err) {
+      process.stderr.write(
+        `  ERROR: failed to add '${rel}': ${err.message} — skipping (original recoverable from .vibecode-backup/ if a backup was made)\n`
+      );
+    }
   }
 
   // 3. Copy modifications (toModify)
   for (const rel of toModify) {
     const src = path.join(kitRoot, rel);
     const dst = path.join(projectRoot, rel);
-    fs.mkdirSync(path.dirname(dst), { recursive: true });
-    fs.copyFileSync(src, dst);
-    console.log(`  modified: ${rel}`);
+    try {
+      fs.mkdirSync(path.dirname(dst), { recursive: true });
+      fs.copyFileSync(src, dst);
+      console.log(`  modified: ${rel}`);
+    } catch (err) {
+      process.stderr.write(
+        `  ERROR: failed to modify '${rel}': ${err.message} — skipping (original recoverable from .vibecode-backup/ if a backup was made)\n`
+      );
+    }
   }
 
   // 4. Remove stale entries (toDelete) — directories get rm -rf, files get rm
@@ -400,6 +437,7 @@ if (isCli) {
     mergeFiles: resolvedJson.merge || [],
     copyIfMissing: resolvedJson.copyIfMissing || [],
     legacyDeletions: resolvedJson.legacyDeletions || [],
+    missingDeclared: resolvedJson.missingDeclared || [],
     forceEmptyOwned,
   });
 
