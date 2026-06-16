@@ -7,7 +7,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 
-const root = execSync("git rev-parse --show-toplevel").toString().trim();
+let root;
+try {
+  root = execSync("git rev-parse --show-toplevel", { stdio: ["pipe", "pipe", "pipe"] }).toString().trim();
+} catch {
+  // Not a git repository — fall back to process.cwd() so the script still works on new projects.
+  root = process.cwd();
+}
 const failures = [];
 const warnings = [];
 
