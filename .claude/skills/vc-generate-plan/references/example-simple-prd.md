@@ -6,6 +6,15 @@ metadata:
   node_type: memory
   type: reference
 ---
+<!-- EXAMPLE: every generated plan file must start with this frontmatter block -->
+---
+name: plan:myapp-neobrutalist-redesign
+description: "Rebuild MyApp social discovery app with neobrutalist aesthetic and modern stack"
+date: 26-11-25
+metadata:
+  node_type: memory
+  type: plan
+---
 # MyApp Neobrutalist Redesign - Plan
 
 **Date:** 26-11-25

@@ -6,6 +6,15 @@ metadata:
   node_type: memory
   type: reference
 ---
+<!-- EXAMPLE: every generated plan file must start with this frontmatter block -->
+---
+name: plan:socialnet-engagement-dashboard
+description: "SocialNet Engagement Dashboard — shareable analytics for content creators"
+date: 25-01-26
+metadata:
+  node_type: memory
+  type: plan
+---
 # SocialNet Engagement Dashboard: Shareable Analytics PRD
 
 **Date**: January 25, 2026

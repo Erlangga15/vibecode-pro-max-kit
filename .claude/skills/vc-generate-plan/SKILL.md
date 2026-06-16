@@ -27,6 +27,23 @@ Optional input: a feature idea plus `simple` or `complex` when the user already 
 
 1. Read `references/generate-plan.md` for the full plan contract.
 2. Run `date +%d-%m-%y` before choosing the filename.
+2a. **Emit plan-file frontmatter as the very first content in the plan file** (required — the
+   validator and discovery tools depend on it). Use this shape, which mirrors the context-doc
+   convention (`node_type: memory`) already used across this repo:
+   ```yaml
+   ---
+   name: plan:{slug}
+   description: "{one-line plan summary}"
+   date: {dd-mm-yy}
+   metadata:
+     node_type: memory
+     type: plan
+   ---
+   ```
+   Set `type: phase-plan` for individual phases inside a multi-phase program; `type: umbrella`
+   for umbrella/orchestration plans; `type: plan` for all other plans. Do NOT add a `status:`
+   field unless the plan explicitly tracks lifecycle state in frontmatter. See
+   `process/development-protocols/plan-lifecycle.md` §Plan-File Frontmatter for the full field spec.
 3. If complexity is not obvious, ask whether the plan is `SIMPLE` or `COMPLEX`.
 4. Save the plan inside a task folder: `process/general-plans/active/{slug}_{date}/{slug}_PLAN_{date}.md` (or `process/features/{feature}/active/{slug}_{date}/{slug}_PLAN_{date}.md`). Create the `{slug}_{date}/` subfolder first. Per **task-folder artefact colocation**, every artefact this plan produces — the plan, any `{slug}_SPEC_{date}.md`, reports, and references — lives INSIDE this same task folder; never write to the deprecated sibling `reports/` or `references/` dirs.
 5. Read `process/context/all-context.md` when present to choose relevant context docs.

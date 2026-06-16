@@ -344,7 +344,23 @@ NOTICE: Unindexed context docs found. These docs are invisible to agents because
 table points to them. Run vc-setup (Flow B) to index them with a one-line routing entry.
 ```
 
-If no old-layout signals and no unindexed docs are found, print nothing for Check C.
+**Additional signal — missing plan frontmatter:** Run `node .claude/skills/vc-audit-plans/scripts/validate-plan-inventory.mjs` (or rely on the recommended validators block below). If the result JSON contains a non-empty `samples.missingPlanFrontmatter` array, print:
+
+```
+NOTICE: Plan files without required frontmatter detected. Plans must start with
+a YAML block (node_type: memory, type: plan) — the same convention used by context
+docs and protocol docs in this repo. Legacy plans without frontmatter still work
+as read-only artifacts, but new plans require it for agent routing and discovery.
+
+To backfill frontmatter on old plans: run vc-setup (Flow B / Merge mode detects
+missing plan frontmatter and proposes prepending the canonical node_type: memory /
+type: plan block with approval). Context docs missing frontmatter get
+node_type: memory / type: context instead.
+```
+
+If no missing-frontmatter plans are found, skip this notice.
+
+If no old-layout signals, no unindexed docs, and no missing-frontmatter plans are found, print nothing for Check C.
 
 **Recommended: run validators**
 

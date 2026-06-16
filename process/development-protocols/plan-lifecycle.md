@@ -136,6 +136,45 @@ When the active work uses a legacy structure such as `PLAN.md` plus `phase-*.md`
 - prefer normalizing to a direct `*_PLAN_*.md` file only when the user has approved cleanup or the ongoing work naturally justifies it
 - treat missing execute-anchor or supporting-file notes as compatibility warnings first, not blockers, unless a later stricter migration is explicitly approved
 
+## Plan-File Frontmatter
+
+Every plan `.md` file — direct `*_PLAN_*.md` files and any plan `.md` inside a `{slug}_{date}/`
+task folder — MUST start with a YAML frontmatter block. This mirrors the context-doc frontmatter
+convention (`node_type: memory`) already in use across context and protocol docs in this repo:
+
+```yaml
+---
+name: plan:{slug}
+description: "{one-line plan summary}"
+date: {dd-mm-yy}
+metadata:
+  node_type: memory
+  type: plan
+---
+```
+
+**Required fields:**
+
+| Field | Value |
+|-------|-------|
+| `name` | `plan:{slug}` — where `{slug}` is the kebab-case task slug matching the filename (e.g. `plan:model-selector`) |
+| `description` | One-line plain-English summary of what the plan covers |
+| `date` | Today in `dd-mm-yy` format (e.g. `16-06-26` for 16 June 2026) |
+| `metadata.node_type` | Always `memory` — matches the convention used by context docs, protocol docs, and skill references |
+| `metadata.type` | One of: `plan` · `phase-plan` · `umbrella` · `reference` · `implementation` |
+
+**`status` is optional** — omit it unless the plan explicitly tracks lifecycle state in frontmatter.
+
+**Allowed `metadata.type` values:** `plan` · `phase-plan` · `umbrella` · `reference` · `implementation`
+
+**Date format note:** `dd-mm-yy` is the canonical plan date format (e.g. `16-06-26`). Use the
+two-digit year form matching context and protocol docs in this repo.
+
+**Umbrella plans** use `type: umbrella`. Per-phase plans use `type: phase-plan`.
+
+Legacy plans that predate this convention are treated as warnings by the validator, not hard
+failures. Add frontmatter to legacy plans opportunistically when they are next touched.
+
 ## Stronger Direct-Plan Contract
 
 For new or newly touched direct `*_PLAN_*.md` files, required sections are defined in
