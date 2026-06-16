@@ -160,6 +160,8 @@ The combination of existing context + fresh user input produces the best results
 
 **Step 4: STUDY** -- Deep-scan and update/create context with real content. For existing files, merge intelligently -- fill gaps and update stale sections without replacing good user-written content. (See Phase 3 details below.)
 
+**Step 4b: INDEX UNINDEXED CONTEXT DOCS** -- After STUDY, scan `process/context/` for any `.md` doc that is not referenced in `all-context.md` or its owning `all-{group}.md` group entrypoint. For each unindexed doc: either add an entry to the appropriate routing table (with a one-line description of when to read it) or surface it in PRESENT & ASK so the user can confirm where it belongs. Run `node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs` and confirm 0 unindexed-doc failures before declaring STUDY complete.
+
 **Step 5: VALIDATE** -- Verify everything is wired correctly. (See Phase 4 details below.)
 
 ---
@@ -184,7 +186,7 @@ Create the `process/` directory with seed files and instructional content.
 | `process/skills/` exists at top level | Move `process/skills/*` to `process/general-plans/backlog/`, then remove empty `process/skills/` |
 | Example PRDs at old locations (e.g. `process/context/example-*.md` or under `process/context/planning/` or under `process/development-protocols/references/`) | Move to `.claude/skills/vc-generate-plan/references/` |
 | process/context/backlog.md at top of context/ | Move to `process/general-plans/backlog/backlog.md` |
-| Flat `*_PLAN_*.md` files directly in `process/general-plans/active/` or `process/features/*/active/` (old pre-v3 layout) | Create a `{slug}_{date}/` task subfolder and move the plan file inside it. Completed plans go to `completed/{slug}_{date}/` instead. |
+| Flat `*_PLAN_*.md` files directly in `process/general-plans/active/` or `process/features/*/active/` (old pre-v3 layout) | Create a `{slug}_{dd-mm-yy}/` task subfolder and move the plan file inside it. Use today's date in dd-mm-yy format (e.g. 16-06-26 for 16 June 2026) — the canonical convention in plan-lifecycle.md. Completed plans go to `completed/{slug}_{dd-mm-yy}/` instead. |
 | `process/general-plans/reports/`, `process/general-plans/references/`, or `process/features/*/reports/`, `process/features/*/references/` sibling dirs | **Not auto-migrated.** Show the user a list of what is in them and recommend moving contents into the nearest task folder manually. Leave in place if the user prefers — they are read-only legacy artifacts and do not break the harness. |
 | Feature folder missing `active/` subdirectory (e.g. `process/features/{name}/` exists but has no `active/`, `completed/`, or `backlog/` under it) | Create `active/`, `completed/`, `backlog/` under that feature folder, seed each from the `_feature-template/` `_GUIDE.md`, and print every creation. |
 

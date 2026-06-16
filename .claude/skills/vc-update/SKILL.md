@@ -323,21 +323,28 @@ If `.claude/settings.json` was NOT in `toPreserve` (it was freshly written), ski
 
 Scan for these two signals of pre-v3.0.0 plan layout:
 
-1. Any `*.md` file matching `*_PLAN_*.md` that lives **directly** in `process/general-plans/active/` or `process/features/*/active/` (flat file, not inside a `{slug}_{date}/` subfolder).
+1. Any `.md` file located **directly** in `process/general-plans/active/` or `process/features/*/active/` that is NOT inside a `{slug}_{date}/` task subfolder. This covers all legacy flat shapes: `PLAN.md`, `plan.md`, `phase-1.md`, `phase-00-*.md`, `*_PLAN_*.md`, and any other `.md` file that sits at the root of the `active/` directory rather than inside a named date subfolder.
 2. Any `reports/` or `references/` directory that is a **sibling** of `active/`/`completed/`/`backlog/` under `process/general-plans/` or `process/features/*/`.
 
 If either signal is found, print:
 
 ```
 NOTICE: Old-layout process/ folders detected. v3.0.0 uses task-folder convention
-(active/{slug}_{date}/{slug}_PLAN_{date}.md). Your existing plans still work as
+(active/{slug}_{dd-mm-yy}/{slug}_PLAN_{dd-mm-yy}.md). Your existing plans still work as
 read-only legacy artifacts, but new plans should use the task-folder layout.
 
 To migrate automatically: run vc-setup (Flow B / Merge mode detects and migrates
 old layouts with your approval before touching anything).
 ```
 
-If no old-layout signals are found, print nothing for Check C.
+**Additional signal — unindexed context docs:** Run `node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs` after applying the update. If it reports unindexed docs under `process/context/` (docs that exist on disk but are not referenced in `all-context.md` or their group `all-{group}.md` entrypoint), print:
+
+```
+NOTICE: Unindexed context docs found. These docs are invisible to agents because no routing
+table points to them. Run vc-setup (Flow B) to index them with a one-line routing entry.
+```
+
+If no old-layout signals and no unindexed docs are found, print nothing for Check C.
 
 **Recommended: run validators**
 

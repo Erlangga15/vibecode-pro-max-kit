@@ -52,7 +52,9 @@ function extractInlineBackticks(text) {
 
 const guidePath = "README.md";
 if (!exists(guidePath)) {
-  fail("README.md does not exist");
+  // No README.md at all — this is a bare user project (not the kit catalog).
+  // Skip all agent/skill table checks, same as when a non-catalog README is present.
+  console.log("[bare-user-project mode] no README.md present — skipping agent/skill table checks");
 } else {
   const guideText = read(guidePath);
 
@@ -132,6 +134,9 @@ if (!exists(guidePath)) {
 
   // Check: every GUIDE.md skill should exist on disk
   for (const skill of guideSkills) {
+    // Skip naming-prefix stubs: tokens that end with a hyphen (e.g. `vc-`, `my-`, `team-`)
+    // or are shorter than 5 chars are examples in naming-convention prose, not real skill names.
+    if (skill.endsWith("-") || skill.length < 5) continue;
     // Also check vc--prefixed variant (README.md may list "code-reviewer" which is an agent, not a skill folder)
     if (!diskSkillFolders.has(skill) && !diskSkills.has(skill) && !diskSkills.has(`vc-${skill}`)) {
       warn(`Skill ${skill} listed in README.md but not found on disk`);

@@ -406,7 +406,7 @@ Detect old directory layouts and reorganize them into the harness standard struc
 | `process/skills/` exists at top level | Move `process/skills/*` to `process/general-plans/backlog/`. Remove empty `process/skills/`. |
 | Example PRDs at old locations (under `process/context/`, `process/context/planning/`, or `process/development-protocols/references/`) | Move to `.claude/skills/vc-generate-plan/references/`. |
 | process/context/backlog.md | Move to `process/general-plans/backlog/backlog.md` |
-| Flat `*_PLAN_*.md` file directly in `process/general-plans/active/` or `process/features/*/active/` (pre-v3.0.0 layout) | Create a `{slug}_{date}/` task subfolder and move the plan file inside it. Scan the plan for "COMPLETE"/"DONE" markers; if found, create under `completed/{slug}_{date}/` instead. Never overwrite if a task folder with the same name exists — add `-migrated` suffix. |
+| Flat `*_PLAN_*.md` file directly in `process/general-plans/active/` or `process/features/*/active/` (pre-v3.0.0 layout) | Create a `{slug}_{dd-mm-yy}/` task subfolder and move the plan file inside it. Use today's date in dd-mm-yy format (e.g. 16-06-26 for 16 June 2026) — the canonical convention in plan-lifecycle.md. Scan the plan for "COMPLETE"/"DONE" markers; if found, create under `completed/{slug}_{dd-mm-yy}/` instead. Never overwrite if a task folder with the same name exists — add `-migrated` suffix. |
 | `process/general-plans/reports/`, `process/general-plans/references/`, or `process/features/*/reports/`, `process/features/*/references/` sibling directories | **Not auto-migrated.** List their contents to the user in the LAYOUT CHANGES section and recommend moving files into the nearest task folder manually. Leave in place if the user prefers — they are read-only legacy artifacts and do not break the harness. Do NOT create new `reports/` or `references/` sibling dirs during scaffold. |
 
 **Migration rules:**
@@ -602,6 +602,21 @@ After scanning test setup (or receiving Round 1 findings from Subagent B), write
 3. **Commands section**: List actual test commands per package/workspace in a table or code blocks
 4. **Debugging Quick Reference**: Note any test config quirks found (e.g., "uses jsdom environment", "needs .env.test", "requires running database")
 5. **Known Gaps**: Leave empty but remove any placeholder comments
+
+### Index Unindexed Context Docs (required for Merge/Refresh modes)
+
+After the STUDY phase populates or updates context files, scan `process/context/` for any `.md` doc not referenced in `all-context.md` or its owning `all-{group}.md` group entrypoint:
+
+```bash
+node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs
+```
+
+For each doc reported as unindexed:
+- Add a routing entry (with a one-line `Read when:` description) to the appropriate routing table in `all-context.md` or `all-{group}.md`.
+- If placement is uncertain, surface the doc to the user in PRESENT & ASK (Flow B) or the STUDY summary (Flow A) and ask where it belongs.
+- Re-run the validator and confirm 0 unindexed-doc failures before proceeding to VALIDATE.
+
+**Do not leave migrated or legacy context docs unindexed.** An unindexed doc is invisible to agents — it will never be routed to and its knowledge is effectively lost.
 
 ### Migration Intelligence (for Merge/Refresh modes)
 
