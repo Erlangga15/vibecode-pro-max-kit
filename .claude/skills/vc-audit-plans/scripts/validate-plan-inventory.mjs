@@ -72,7 +72,7 @@ function hasPlanFrontmatter(text) {
   const end = text.indexOf("\n---", 3);
   if (end === -1) return false;
   const block = text.slice(0, end + 4);
-  return /node_type:\s*memory/.test(block) && /\btype:\s*plan/.test(block);
+  return /node_type:\s*memory/.test(block) && /\btype:\s*(plan|phase-plan|umbrella|implementation|reference)\b/.test(block);
 }
 
 // Co-located task-folder artifacts are valid non-plan files inside active/ task subfolders.

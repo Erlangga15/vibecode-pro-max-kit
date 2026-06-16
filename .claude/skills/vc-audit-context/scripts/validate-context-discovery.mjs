@@ -307,8 +307,24 @@ if (!bareKitMode) {
     }
   }
 
+  // Context group paths that are documented as optional (UI-only, created only when the
+  // project has substantial content in that domain). Missing these is an expected state
+  // for non-UI projects and must not cause exit 1 — downgrade to a warning per
+  // vc-setup SKILL.md §Phase 4 VALIDATE ("Expected validator warnings on fresh projects").
+  const optionalContextPaths = new Set([
+    "process/context/uxui/",
+    "process/context/uxui/all-uxui.md",
+    "process/context/uxui/uiux.md",
+  ]);
+
   for (const { file, ref } of concreteRefs) {
-    if (!exists(ref)) fail(`${file} references missing ${ref}`);
+    if (!exists(ref)) {
+      if (optionalContextPaths.has(ref)) {
+        warn(`${file} references optional ${ref} (not present — expected for non-UI projects)`);
+      } else {
+        fail(`${file} references missing ${ref}`);
+      }
+    }
   }
 
   const contextDocsForCheck = walk("process/context", (rel) => rel.endsWith(".md")).sort();
