@@ -145,7 +145,8 @@ let checkedAgents = 0;
 for (const absPath of agentFiles) {
   const relPath = path.relative(root, absPath);
   const rawText = fs.readFileSync(absPath, "utf8");
-  const { body, offset: frontmatterLineCount } = stripFrontmatter(rawText);
+  const { body: rawBody, offset: frontmatterLineCount } = stripFrontmatter(rawText);
+  const body = rawBody.replace(/<!--[\s\S]*?-->/g, "");
   checkedAgents++;
 
   // Split body into lines for line-number reporting (1-based from file start)
