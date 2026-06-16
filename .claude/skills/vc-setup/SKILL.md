@@ -58,12 +58,17 @@ Then re-run vc-setup.
 
 Gather information about the target project before making any changes.
 
-1. Read `package.json` to detect the package manager (`packageManager` field, lockfile presence), framework (dependencies), and test commands (scripts).
-2. Detect monorepo structure: `workspaces` in `package.json`, `pnpm-workspace.yaml`, `apps/`, `packages/` directories.
-3. Scan for existing `process/`, `docs/`, `.github/` directories and any context files.
-4. **Classify the project** as one of:
+1. **Non-JS projects:** if the detected manifest is NOT `package.json` (e.g. `go.mod`, `pyproject.toml`, `Cargo.toml`, `Gemfile`), SKIP the Package Manager / Framework / Test-Setup detection steps below and jump to Manifest Detection in `references/vc-setup.md` §DETECT Phase.
+2. Read `package.json` to detect the package manager (`packageManager` field, lockfile presence), framework (dependencies), and test commands (scripts).
+3. Detect monorepo structure: `workspaces` in `package.json`, `pnpm-workspace.yaml`, `apps/`, `packages/` directories.
+4. Scan for existing `process/`, `docs/`, `.github/` directories and any context files.
+5. **Classify the project** as one of:
    - **New**: no existing `process/` directory, no `all-context.md`, no meaningful prior setup.
    - **Existing**: has `process/`, `all-context.md`, CLAUDE.md with project content, or other prior context.
+
+   **Classification corner cases (full 7-row table in `references/vc-setup.md` §Project Classification):**
+   - `process/` contains ONLY kit-installed files (`_seeds/`, `development-protocols/`, `context/generated-skills-catalog.json`) and no user content → **New / Flow A** (install.sh ran but the user hasn't set up yet).
+   - `all-context.md` exists but its non-comment body is all placeholder/stub (`<!-- STUDY: -->`) → **Flow A**, continue to STUDY (do NOT treat as existing project).
 5. Present a detection summary to the user and wait for confirmation before proceeding.
 
 **After detection, the workflow branches based on project type.** See the two flows below.
@@ -237,13 +242,18 @@ Verify the setup is complete, correct, and populated with real content.
    - `all-tests.md` has actual test commands (not placeholder text)
    - Context groups created have corresponding entries in the routing tables
    - Feature folders created have `_GUIDE.md` files with real scope descriptions
-5. **Catalog generate-on-install safety check:** If `process/context/generated-skills-catalog.json` is absent after setup, generate it now:
+4. **Placeholder scan (required):** grep the populated `all-*.md` context files for remaining `<!-- STUDY:` or `(pending` markers. If any remain, STUDY is incomplete — return to STUDY and populate them before declaring VALIDATE done.
+   ```bash
+   grep -rn -e '<!-- STUDY:' -e '(pending' process/context/ && echo 'INCOMPLETE — populate before VALIDATE'
+   ```
+   A zero-match exit (no output, exit 1 from grep) means the scan is clean and VALIDATE may proceed.
+6. **Catalog generate-on-install safety check:** If `process/context/generated-skills-catalog.json` is absent after setup, generate it now:
    ```bash
    node .claude/skills/vc-audit-context/scripts/generate-skills-catalog.mjs --write
    ```
    This file is required for `discover-skills.mjs` (Routing Step 0) to work correctly. Fresh installs that copy this file from the kit manifest include do not need this step, but if the file is missing for any reason (missing manifest include, partial install), generate it explicitly. Note: `generate-skills-catalog.mjs` (and its shared utils) works on non-git projects — it falls back to `process.cwd()` when `git rev-parse` is unavailable.
-6. Report any issues found.
-7. Suggest running validation scripts if they exist in the target repo:
+7. Report any issues found.
+8. Suggest running validation scripts if they exist in the target repo:
    - `node .claude/skills/vc-generate-context/scripts/validate-all-context.mjs`
    - `node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs`
 
