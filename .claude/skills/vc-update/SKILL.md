@@ -149,8 +149,14 @@ SYMLINKS:
   [ok]        .agents/skills -> ../.claude/skills
   [will fix]  .codex/hooks -> ../.claude/hooks
 
+STALE WARNINGS: N paths failed the namespace guard (showing first 5 — see full compute-sync-plan output)
+  .claude/skills/my-custom-vc-tool/SKILL.md
+  ...
+
 Summary: 5 modified, 2 new, 1 removal, 1 merge skipped, 45 unchanged
 ```
+
+If `staleWarnings` is empty, omit the `STALE WARNINGS` section entirely. If non-empty, print the count and the first 5 entries only — do not dump all paths. Stale warnings indicate vc-namespace paths in your prior snapshot that are not in the kit's known `ownedPaths`. **If you have a custom vc-\* skill at one of those paths, rename it before applying the update** to prevent it from being deleted as a stale kit artifact.
 
 **Large-delete WARNING:** After computing the dry-run summary, check `toDelete.length`. If it exceeds 20 files OR exceeds 10% of the prior install file count (line count of `.vc-installed-files`), print the following block prominently before asking for confirmation:
 

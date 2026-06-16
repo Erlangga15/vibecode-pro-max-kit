@@ -2,13 +2,13 @@
 
 Detailed reference for the vc-update skill.
 
-## vc-manifest.json Schema Reference (v2.1.0)
+## vc-manifest.json Schema Reference (v3.0.0)
 
 The manifest uses glob-based patterns resolved by `resolve-manifest.mjs`.
 
 ```json
 {
-  "version": "2.1.0",
+  "version": "3.0.0",
   "include": [
     ".claude/agents/**",
     ".claude/skills/**",

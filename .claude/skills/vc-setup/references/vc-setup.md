@@ -9,10 +9,13 @@ After running DETECT, classify the project before choosing a flow:
 | Signal | Classification |
 |--------|---------------|
 | No `process/` directory, no `all-context.md`, no meaningful CLAUDE.md content | **New project** -- use Flow A |
-| Has `process/` directory with any content | **Existing project** -- use Flow B |
+| `process/` exists but contains ONLY kit-installed files (`_seeds/`, `development-protocols/`, `context/generated-skills-catalog.json`) and no user content (`all-context.md` absent, `general-plans/` absent, `features/` absent or empty) | **New project** -- use Flow A (install.sh ran but vc-setup has not yet run; this is a fresh install) |
+| Has `process/` directory with user content (e.g. `all-context.md`, `general-plans/` with plans, `features/` with entries) | **Existing project** -- use Flow B |
 | Has `all-context.md` with real (non-placeholder) content | **Existing project** -- use Flow B |
 | Has CLAUDE.md with project-specific sections (beyond managed protocol) | **Existing project** -- use Flow B |
 | Has `.vibecode-backup/` (just ran install.sh over an existing setup) | **Existing project** -- use Flow B |
+
+**Classification is based on USER content, not kit-installed files.** `_seeds/`, `development-protocols/`, and `context/generated-skills-catalog.json` are always present after install.sh and do not indicate an existing project setup. Check for user-created files before routing to Flow B.
 
 When in doubt, treat as existing. It is always safer to study first and ask before changing things.
 
@@ -105,9 +108,18 @@ Before proposing any changes, build a complete picture of what is already there.
 - `process/development-protocols/` -- check if protocol docs exist and their version
 - Any `CLAUDE.md` content beyond the managed protocol (some users add project-specific sections)
 
+**Cross-check against the expected target directory tree.** Any directory from the following list that does not exist on disk is classified as MISSING:
+
+- `process/general-plans/active/`, `process/general-plans/completed/`, `process/general-plans/backlog/`
+- `process/features/`
+- `process/context/planning/`
+- `process/context/tests/`
+
+Record MISSING directories in the PRESENT & ASK findings under "MISSING" so the user can approve their creation during SCAFFOLD.
+
 **Produce an internal assessment:**
 
-For each file/directory found, classify it as:
+For each file/directory found (or expected), classify it as:
 - **Good**: has real, detailed, useful content. Keep as-is.
 - **Stale**: has content but it is outdated, incomplete, or has unfilled placeholders. Candidate for update.
 - **Placeholder**: seed template text with no real content. Candidate for replacement.
@@ -413,11 +425,17 @@ Detect old directory layouts and reorganize them into the harness standard struc
 
 Update protocols, preserve user content (read from `process/_seeds/`, never modify seeds):
 
-1. Overwrite development protocol files from `process/development-protocols/` (these are managed system files that live in the real directory, not in `_seeds/`)
-2. Add missing seed files (do not overwrite existing ones)
-3. Add missing `_GUIDE.md` files from `process/_seeds/`
-4. Update `.seed` companion files to latest versions from `process/_seeds/` (these are structural references, not user content)
-5. Preserve all user-created plans, reports, references, and context docs
+1. Create any missing target-tree working directories (sourcing each `_GUIDE.md` from `process/_seeds/` where applicable):
+   - `process/general-plans/active/`, `process/general-plans/completed/`, `process/general-plans/backlog/`
+   - `process/features/`
+   - `process/context/planning/`
+   - `process/context/tests/`
+   Skip directories that already exist.
+2. Overwrite development protocol files from `process/development-protocols/` (these are managed system files that live in the real directory, not in `_seeds/`)
+3. Add missing seed files: for each `.seed` file in `process/_seeds/`, if the corresponding target (same path with the `.seed` extension removed) does NOT exist, copy it with `.seed` removed and `{{project_name}}` replaced with the detected project name. Never overwrite an existing target file.
+4. Add missing `_GUIDE.md` files from `process/_seeds/`
+5. Update `.seed` companion files to latest versions from `process/_seeds/` (these are structural references, not user content)
+6. Preserve all user-created plans, reports, references, and context docs
 
 ### Placeholder Reference
 

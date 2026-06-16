@@ -39,7 +39,11 @@ Read `references/vc-setup.md` for detailed phase instructions, detection heurist
 
 ### Phase 0: BOOTSTRAP (handled by install.sh)
 
-The `install.sh` script handles fetching and installing harness files before vc-setup runs. For existing projects, it backs up old `.claude/`, `.codex/`, `.agents/` to `.vibecode-backup/`, then does a clean install of all kit files. User's `.claude/settings.json` is restored after install. The `process/` directory is never touched by install.sh -- layout migration happens in vc-setup's SCAFFOLD phase.
+The `install.sh` script handles fetching and installing harness files before vc-setup runs. For existing projects, it backs up old `.claude/`, `.codex/`, `.agents/` to `.vibecode-backup/`, then does a clean install of all kit files. User's `.claude/settings.json` is restored after install.
+
+**What install.sh DOES create under `process/`:** `process/_seeds/`, `process/development-protocols/`, and `process/context/generated-skills-catalog.json`. These are kit-installed files, not user content.
+
+**What install.sh does NOT create:** `process/general-plans/`, `process/features/`, `process/context/all-context.md`, or any context group directories. Those are vc-setup's job, created during the SCAFFOLD and STUDY phases.
 
 **If harness files are already present** (`.claude/agents/` and `.claude/skills/` exist with 12+ agents and 20+ skills), skip Phase 0 and proceed directly to Phase 1 DETECT.
 
@@ -244,6 +248,8 @@ Verify the setup is complete, correct, and populated with real content.
    - `node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs`
 
    **Validator cwd discipline:** Run every validator from the project root: `cd {project_root} && node .claude/skills/...`. The scripts resolve the project via `git rev-parse --show-toplevel`; running from a parent directory resolves the wrong root and produces misleading results.
+
+   **Expected validator warnings on fresh projects:** `validate-context-discovery.mjs` may report missing context group directories such as `process/context/uxui/` or other groups. This is EXPECTED for projects that do not have content in those domains — do not create empty group directories just to silence the warning. Create a context group only when the project genuinely has substantial content for that domain (see Context Group Detection Table in the STUDY phase).
 
 **Present the final summary** to the user: what was set up, what is ready to use, and recommended next steps (review context, start using the harness).
 
