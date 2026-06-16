@@ -60,7 +60,7 @@ Gather information about the target project before making any changes.
 
 1. **Non-JS projects:** if the detected manifest is NOT `package.json` (e.g. `go.mod`, `pyproject.toml`, `Cargo.toml`, `Gemfile`), SKIP the Package Manager / Framework / Test-Setup detection steps below and jump to Manifest Detection in `references/vc-setup.md` §DETECT Phase.
 2. Read `package.json` to detect the package manager (`packageManager` field, lockfile presence), framework (dependencies), and test commands (scripts).
-3. Detect monorepo structure: `workspaces` in `package.json`, `pnpm-workspace.yaml`, `apps/`, `packages/` directories. (non-JS projects: skip the `workspaces in package.json` check; use the other signals — `pnpm-workspace.yaml`, `apps/`, `packages/` — as applicable)
+3. Detect monorepo structure: `workspaces` in `package.json`, `pnpm-workspace.yaml`, `apps/`, `packages/` directories.
 4. Scan for existing `process/`, `docs/`, `.github/` directories and any context files.
 5. **Classify the project** as one of:
    - **New**: no existing `process/` directory, no `all-context.md`, no meaningful prior setup.
@@ -69,7 +69,7 @@ Gather information about the target project before making any changes.
    **Classification corner cases (full 7-row table in `references/vc-setup.md` §Project Classification):**
    - `process/` contains ONLY kit-installed files (`_seeds/`, `development-protocols/`, `context/generated-skills-catalog.json`) and no user content → **New / Flow A** (install.sh ran but the user hasn't set up yet).
    - `all-context.md` exists but its non-comment body is all placeholder/stub (`<!-- STUDY: -->`) → **Flow A**, continue to STUDY (do NOT treat as existing project).
-6. Present a detection summary to the user and wait for confirmation before proceeding.
+5. Present a detection summary to the user and wait for confirmation before proceeding.
 
 **After detection, the workflow branches based on project type.** See the two flows below.
 
@@ -160,8 +160,6 @@ The combination of existing context + fresh user input produces the best results
 
 **Step 4: STUDY** -- Deep-scan and update/create context with real content. For existing files, merge intelligently -- fill gaps and update stale sections without replacing good user-written content. (See Phase 3 details below.)
 
-**Step 4b: INDEX UNINDEXED CONTEXT DOCS** -- After STUDY, scan `process/context/` for any `.md` doc that is not referenced in `all-context.md` or its owning `all-{group}.md` group entrypoint. For each unindexed doc: either add an entry to the appropriate routing table (with a one-line description of when to read it) or surface it in PRESENT & ASK so the user can confirm where it belongs. Run `node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs` and confirm 0 unindexed-doc failures before declaring STUDY complete.
-
 **Step 5: VALIDATE** -- Verify everything is wired correctly. (See Phase 4 details below.)
 
 ---
@@ -186,9 +184,7 @@ Create the `process/` directory with seed files and instructional content.
 | `process/skills/` exists at top level | Move `process/skills/*` to `process/general-plans/backlog/`, then remove empty `process/skills/` |
 | Example PRDs at old locations (e.g. `process/context/example-*.md` or under `process/context/planning/` or under `process/development-protocols/references/`) | Move to `.claude/skills/vc-generate-plan/references/` |
 | process/context/backlog.md at top of context/ | Move to `process/general-plans/backlog/backlog.md` |
-| Flat `*_PLAN_*.md` files directly in `process/general-plans/active/` or `process/features/*/active/` (old pre-v3 layout) | Create a `{slug}_{dd-mm-yy}/` task subfolder and move the plan file inside it. Use today's date in dd-mm-yy format (e.g. 16-06-26 for 16 June 2026) — the canonical convention in plan-lifecycle.md. Completed plans go to `completed/{slug}_{dd-mm-yy}/` instead. |
-| Task folders using ISO-format dates (e.g. `something_2025-01-01/`) instead of the canonical `dd-mm-yy` format | Rename to drop the ISO format: `something_2025-01-01/` → `something_01-01-25/`. Apply to both `active/` and `completed/` task folders. Update any internal plan filenames that embed the date (e.g. `something_PLAN_2025-01-01.md` → `something_PLAN_01-01-25.md`). Show proposed renames before executing. |
-| Plan `.md` files lacking frontmatter (`node_type: memory` + `type: plan` block absent — detected by `validate-plan-inventory.mjs` `missingPlanFrontmatter` warning) | For each such plan: propose prepending the canonical frontmatter block (derive `slug` from the filename, `date` in `dd-mm-yy` from the filename datestamp or today if absent; `type: plan` for standard plans, `type: phase-plan` for phase files, `type: umbrella` for umbrella plans). Prepend with user approval. This syncs back the `node_type: memory` / `type: plan` convention already standard in the reference repo. Context docs lacking frontmatter get `node_type: memory` / `type: context` instead. See `process/development-protocols/plan-lifecycle.md` §Plan-File Frontmatter for the canonical shape. |
+| Flat `*_PLAN_*.md` files directly in `process/general-plans/active/` or `process/features/*/active/` (old pre-v3 layout) | Create a `{slug}_{date}/` task subfolder and move the plan file inside it. Completed plans go to `completed/{slug}_{date}/` instead. |
 | `process/general-plans/reports/`, `process/general-plans/references/`, or `process/features/*/reports/`, `process/features/*/references/` sibling dirs | **Not auto-migrated.** Show the user a list of what is in them and recommend moving contents into the nearest task folder manually. Leave in place if the user prefers — they are read-only legacy artifacts and do not break the harness. |
 | Feature folder missing `active/` subdirectory (e.g. `process/features/{name}/` exists but has no `active/`, `completed/`, or `backlog/` under it) | Create `active/`, `completed/`, `backlog/` under that feature folder, seed each from the `_feature-template/` `_GUIDE.md`, and print every creation. |
 
@@ -246,9 +242,9 @@ Verify the setup is complete, correct, and populated with real content.
    - `all-tests.md` has actual test commands (not placeholder text)
    - Context groups created have corresponding entries in the routing tables
    - Feature folders created have `_GUIDE.md` files with real scope descriptions
-5. **Placeholder scan (required):** grep the populated `all-*.md` context files for remaining `<!-- STUDY:` or `(pending` markers. If any remain, STUDY is incomplete — return to STUDY and populate them before declaring VALIDATE done. The `--include` / `--exclude` flags restrict the scan to live `.md` docs and skip `.seed` companion files (which legitimately contain these markers as reference templates).
+4. **Placeholder scan (required):** grep the populated `all-*.md` context files for remaining `<!-- STUDY:` or `(pending` markers. If any remain, STUDY is incomplete — return to STUDY and populate them before declaring VALIDATE done.
    ```bash
-   grep -rn --include="*.md" --exclude="*.seed" -e '<!-- STUDY:' -e '(pending' process/context/ && echo 'INCOMPLETE — populate before VALIDATE'
+   grep -rn -e '<!-- STUDY:' -e '(pending' process/context/ && echo 'INCOMPLETE — populate before VALIDATE'
    ```
    A zero-match exit (no output, exit 1 from grep) means the scan is clean and VALIDATE may proceed.
 6. **Catalog generate-on-install safety check:** If `process/context/generated-skills-catalog.json` is absent after setup, generate it now:
@@ -263,9 +259,7 @@ Verify the setup is complete, correct, and populated with real content.
 
    **Validator cwd discipline:** Run every validator from the project root: `cd {project_root} && node .claude/skills/...`. The scripts resolve the project via `git rev-parse --show-toplevel`; running from a parent directory resolves the wrong root and produces misleading results.
 
-   **Expected warnings from `validate-all-context.mjs` on brand-new projects:** On a fresh project, this validator will emit up to 3 warnings that require NO action — missing git HEAD (the project has no commits yet), missing source-references section, and missing open-questions section. These resolve automatically as the project ships its first features and context files are filled in. Do not treat them as setup failures.
-
-   **Expected validator warnings on fresh projects:** Run `validate-context-discovery.mjs` ONLY after STUDY finishes. Before STUDY creates the tests/all-tests.md and planning/all-planning.md files under process/context/, expect 80+ concrete-ref failures from the agent prompt files (`.claude/agents/*.md` and `.codex/agents/*.toml` reference those paths) — these are EXPECTED until STUDY completes, not real errors. After STUDY, `validate-context-discovery.mjs` may still report missing context group directories such as `process/context/uxui/` (if the project has a UI/UX context group) or other groups. This is EXPECTED for projects that do not have content in those domains — do not create empty group directories just to silence the warning. Create a context group only when the project genuinely has substantial content for that domain (see Context Group Detection Table in the STUDY phase).
+   **Expected validator warnings on fresh projects:** `validate-context-discovery.mjs` may report missing context group directories such as process/context/uxui/ (if project has UI/UX context group) or other groups. This is EXPECTED for projects that do not have content in those domains — do not create empty group directories just to silence the warning. Create a context group only when the project genuinely has substantial content for that domain (see Context Group Detection Table in the STUDY phase).
 
 **Present the final summary** to the user: what was set up, what is ready to use, and recommended next steps (review context, start using the harness).
 

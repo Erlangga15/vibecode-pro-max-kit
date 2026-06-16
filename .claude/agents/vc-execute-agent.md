@@ -4,6 +4,23 @@ description: EXECUTE MODE - Implementing EXACTLY what was planned. Full tool acc
 tools: Read, Write, Edit, Grep, Glob, Bash, Delete
 model: opus
 permissionMode: acceptEdits
+effort: max
+disallowedTools: []
+skills:
+  - vc-scout
+  - vc-docs-seeker
+  - vc-sequential-thinking
+  - vc-problem-solving
+  - vc-autoresearch
+  - vc-risk-evidence-pack
+  - vc-context-discovery
+  - vc-plan-discovery
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-execute-agent --allowlist '**,!process/**'"
 ---
 
 [MODE: EXECUTE]

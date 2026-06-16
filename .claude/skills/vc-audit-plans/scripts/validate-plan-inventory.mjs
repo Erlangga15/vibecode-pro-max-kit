@@ -61,19 +61,7 @@ const samples = {
   missingPhaseRules: [],
   missingVerification: [],
   likelyReferenceInActive: [],
-  missingPlanFrontmatter: [],
 };
-
-// Check whether a plan file has the required plan-file frontmatter.
-// Required shape: node_type: memory AND type: plan
-// (node_type: memory mirrors the context-doc frontmatter convention used repo-wide).
-function hasPlanFrontmatter(text) {
-  if (!text.startsWith("---")) return false;
-  const end = text.indexOf("\n---", 3);
-  if (end === -1) return false;
-  const block = text.slice(0, end + 4);
-  return /node_type:\s*memory/.test(block) && /\btype:\s*(plan|phase-plan|umbrella|implementation|reference)\b/.test(block);
-}
 
 // Co-located task-folder artifacts are valid non-plan files inside active/ task subfolders.
 // Skip _REPORT_, _REF_, and _SPEC_ files from plan-specific checks to prevent false positives.
@@ -92,9 +80,6 @@ for (const file of activePlans) {
 
   if (!hasDateStamp(name)) samples.nameNotDateStamped.push(file);
   if (!/_PLAN_|PLAN\.md$|PLAN_/.test(name)) samples.noPlanInName.push(file);
-  if (/_PLAN_|PLAN\.md$|PLAN_/.test(name) && !hasPlanFrontmatter(text)) {
-    samples.missingPlanFrontmatter.push(file);
-  }
   if (!/Phase Completion Rules|phase is NOT complete|Phase is NOT complete/i.test(text)) {
     samples.missingPhaseRules.push(file);
   }

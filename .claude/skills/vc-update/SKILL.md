@@ -20,8 +20,6 @@ Pull the latest agent harness improvements from the remote vibecode-pro-max-kit 
 - Periodically to check for updates
 - After bootstrapping a project with `vc-setup` and wanting the latest improvements
 
-**Two-phase reality:** vc-update = file sync + detection. It updates `.claude/`, `.codex/`, `CLAUDE.md`, and harness protocol files, then detects old-layout artifacts in your `process/` folder. The actual `process/` migration (moving flat plans into task folders, backfilling frontmatter, indexing stale context docs) happens in a separate vc-setup run. When vc-update prints a migration NOTICE, paste the ready-to-run prompt it provides straight back into Claude Code — one paste, and vc-setup handles the rest.
-
 ## Workflow
 
 Follow these steps exactly. Do NOT skip the dry-run or confirmation step.
@@ -325,62 +323,28 @@ If `.claude/settings.json` was NOT in `toPreserve` (it was freshly written), ski
 
 Scan for these two signals of pre-v3.0.0 plan layout:
 
-1. Any `.md` file located **directly** in `process/general-plans/active/` or `process/features/*/active/` that is NOT inside a `{slug}_{date}/` task subfolder. This covers all legacy flat shapes: `PLAN.md`, `plan.md`, `phase-1.md`, `phase-00-*.md`, `*_PLAN_*.md`, and any other `.md` file that sits at the root of the `active/` directory rather than inside a named date subfolder.
+1. Any `*.md` file matching `*_PLAN_*.md` that lives **directly** in `process/general-plans/active/` or `process/features/*/active/` (flat file, not inside a `{slug}_{date}/` subfolder).
 2. Any `reports/` or `references/` directory that is a **sibling** of `active/`/`completed/`/`backlog/` under `process/general-plans/` or `process/features/*/`.
-3. Any task folder using ISO-format dates (e.g. `something_2025-01-01/`) instead of the canonical `dd-mm-yy` format (e.g. `something_01-01-25/`). These are renamed as part of migration.
 
 If either signal is found, print:
 
 ```
 NOTICE: Old-layout process/ folders detected. v3.0.0 uses task-folder convention
-(active/{slug}_{dd-mm-yy}/{slug}_PLAN_{dd-mm-yy}.md). Your existing plans still work as
+(active/{slug}_{date}/{slug}_PLAN_{date}.md). Your existing plans still work as
 read-only legacy artifacts, but new plans should use the task-folder layout.
 
-To finish migrating, paste this prompt into Claude Code:
-
-    Run vc-setup in Flow B (migration) mode — migrate all old-format plans, deprecated
-    reports/references dirs, missing frontmatter, unindexed context docs, and ISO-date
-    folders to the current structure, showing me the plan before applying.
+To migrate automatically: run vc-setup (Flow B / Merge mode detects and migrates
+old layouts with your approval before touching anything).
 ```
 
-**Additional signal — unindexed context docs:** Run `node .claude/skills/vc-audit-context/scripts/validate-context-discovery.mjs` after applying the update. If it reports unindexed docs under `process/context/` (docs that exist on disk but are not referenced in `all-context.md` or their group `all-{group}.md` entrypoint), print:
-
-```
-NOTICE: Unindexed context docs found. These docs are invisible to agents because no routing
-table points to them.
-
-To index them, paste this prompt into Claude Code:
-
-    Run vc-setup in Flow B (migration) mode — migrate all old-format plans, deprecated
-    reports/references dirs, missing frontmatter, unindexed context docs, and ISO-date
-    folders to the current structure, showing me the plan before applying.
-```
-
-**Additional signal — missing plan frontmatter:** Run `node .claude/skills/vc-audit-plans/scripts/validate-plan-inventory.mjs` (or rely on the recommended validators block below). If the result JSON contains a non-empty `samples.missingPlanFrontmatter` array, print:
-
-```
-NOTICE: Plan files without required frontmatter detected. Plans must start with
-a YAML block (node_type: memory, type: plan) — the same convention used by context
-docs and protocol docs in this repo. Legacy plans without frontmatter still work
-as read-only artifacts, but new plans require it for agent routing and discovery.
-
-To backfill frontmatter, paste this prompt into Claude Code:
-
-    Run vc-setup in Flow B (migration) mode — migrate all old-format plans, deprecated
-    reports/references dirs, missing frontmatter, unindexed context docs, and ISO-date
-    folders to the current structure, showing me the plan before applying.
-```
-
-If no missing-frontmatter plans are found, skip this notice.
-
-If no old-layout signals, no unindexed docs, and no missing-frontmatter plans are found, print nothing for Check C.
+If no old-layout signals are found, print nothing for Check C.
 
 **Recommended: run validators**
 
 After the NOTICE block, print:
 
 ```
-Recommended next step — run the five core validators from your project root:
+Recommended next step — run the five core validators:
 
   node .claude/skills/vc-audit-vc/scripts/validate-agent-parity.mjs
   node .claude/skills/vc-audit-vc/scripts/validate-skills.mjs

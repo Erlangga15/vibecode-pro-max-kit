@@ -65,3 +65,34 @@ See skill: invoke `vc-risk-evidence-pack` for the full 6-class definitions, 5-ar
   when the user asks for a commit. Do NOT create a feature branch first — this overrides the generic
   "if on the default branch, branch first" harness default. Only branch when the user explicitly asks
   for a feature branch or PR.
+
+## Agent Frontmatter Conventions
+
+All agent files at `.claude/agents/*.md` carry structured YAML frontmatter controlling
+runtime behavior. Fields in scope for this program:
+
+- `effort` — token-budget hint for the spawning model. Valid values: `low`, `medium`, `high`, `max`.
+  Use `max` for opus-based execution agents (vc-execute-agent, vc-fast-mode-agent, vc-quick-fix-agent),
+  `high` for planning/validation agents on sonnet, `medium` for lightweight agents, `low` for vc-git-manager.
+- `skills` — list of skill slugs preloaded into the agent context window. Each slug must resolve to a
+  real directory under `.claude/skills/`. Drop any slug that does not resolve; record as a known-gap
+  in the phase report.
+- `disallowedTools` — list of Claude tool names the agent may not invoke. Enforced by the spawning harness.
+  Do not list a tool the agent legitimately needs. Reconcile against the agent's `tools:` grant first.
+- `hooks` — PreToolUse blocks per-agent for identity-aware advisory write-guard. Shape:
+  ```yaml
+  hooks:
+    PreToolUse:
+      - matcher: "Write"
+        hooks:
+          - type: command
+            command: "node .claude/hooks/agent-write-guard.mjs --agent <agent-slug> --allowlist '<glob>'"
+  ```
+  The hook emits advisory JSON to stderr and always exits 0 (never hard-blocks).
+- `background` — set `true` on vc-tester ONLY. All loop-driving agents omit or set false.
+
+**Known gap — CLAUDE_CODE_EFFORT_LEVEL env override:** If the `CLAUDE_CODE_EFFORT_LEVEL` environment
+variable is set in the shell, it overrides the `effort:` frontmatter field for all agents in that
+session, making the per-agent effort values inert. This is a Claude Code harness behavior (not a
+vc-system bug). The `effort:` field documents intent and is applied when the env var is absent.
+Re-check this gap if Claude Code changes the env-override precedence in a future release.

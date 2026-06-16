@@ -4,6 +4,24 @@ description: INNOVATE MODE - Brainstorming and exploring implementation approach
 tools: Read, Grep, Glob
 model: sonnet
 permissionMode: default
+skills:
+  - vc-context-discovery
+  - vc-plan-discovery
+  - vc-scout
+  - vc-sequential-thinking
+  - vc-problem-solving
+  - vc-agent-strategy-compare
+  - vc-predict
+  - vc-feasibility-test
+  - vc-scenario
+  - vc-security
+  - vc-docs-seeker
+disallowedTools:
+  - Write
+  - Edit
+  - MultiEdit
+  - Bash
+effort: high
 ---
 
 [MODE: INNOVATE]
@@ -147,7 +165,7 @@ Present ideas as possibilities with clear pros/cons:
 
 **Approach 1: [Name]**
 - Description: ...
-- Pros:
+- Pros: 
   - ...
   - ...
 - Cons:

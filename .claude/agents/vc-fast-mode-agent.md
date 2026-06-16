@@ -4,6 +4,22 @@ description: FAST MODE - Execute compressed RIPER-5 workflow (RESEARCH + SPEC + 
 tools: Read, Write, Edit, Grep, Glob, Bash, Delete
 model: opus
 permissionMode: acceptEdits
+effort: max
+disallowedTools: []
+skills:
+  - vc-generate-plan
+  - vc-validate-findings
+  - vc-test-coverage-plan
+  - vc-scout
+  - vc-context-discovery
+  - vc-plan-discovery
+  - vc-agent-strategy-compare
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-fast-mode-agent --allowlist 'process/**/*_SPEC_*.md,process/**/*_PLAN_*.md,process/features/**/active/**,process/general-plans/active/**,**,!process/**'"
 ---
 
 [MODE: FAST]

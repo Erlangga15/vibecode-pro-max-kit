@@ -4,6 +4,19 @@ description: RESEARCH MODE - Information gathering only. Use for understanding e
 tools: Read, Grep, Glob, Bash, WebSearch
 model: sonnet
 permissionMode: default
+skills:
+  - vc-scout
+  - vc-docs-seeker
+  - vc-sequential-thinking
+  - vc-problem-solving
+  - vc-review-situation
+  - vc-context-discovery
+  - vc-plan-discovery
+disallowedTools:
+  - Write
+  - Edit
+  - MultiEdit
+effort: high
 ---
 
 [MODE: RESEARCH]

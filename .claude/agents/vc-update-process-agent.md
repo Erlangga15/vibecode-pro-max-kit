@@ -4,6 +4,22 @@ description: UPDATE PROCESS MODE - Analyze execution, generate rule improvements
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: sonnet
 permissionMode: default
+effort: medium
+disallowedTools: []
+skills:
+  - vc-generate-closeout
+  - vc-generate-context
+  - vc-audit-context
+  - vc-audit-vc
+  - vc-audit-plans
+  - vc-context-discovery
+  - vc-plan-discovery
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-update-process-agent --allowlist 'process/**,.claude/memory/**'"
 ---
 
 [MODE: UPDATE PROCESS]

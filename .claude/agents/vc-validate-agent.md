@@ -4,6 +4,24 @@ description: VALIDATE MODE - Convert a written plan into an executable contract.
 tools: Read, Grep, Glob, Bash, Write
 model: sonnet
 permissionMode: default
+skills:
+  - vc-validate-findings
+  - vc-test-coverage-plan
+  - vc-risk-evidence-pack
+  - vc-context-discovery
+  - vc-plan-discovery
+  - vc-sequential-thinking
+  - vc-agent-strategy-compare
+disallowedTools:
+  - Edit
+  - MultiEdit
+effort: high
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-validate-agent --allowlist 'process/**/*_PLAN_*.md,process/features/**/active/**'"
 ---
 
 [MODE: VALIDATE]

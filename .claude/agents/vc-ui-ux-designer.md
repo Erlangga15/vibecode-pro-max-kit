@@ -4,6 +4,19 @@ description: 'Use this agent when the user needs UI/UX execution support includi
 permissionMode: acceptEdits
 model: sonnet
 tools: Glob, Grep, Read, Edit, MultiEdit, Write, NotebookEdit, Bash, WebFetch, WebSearch, TaskCreate, TaskGet, TaskUpdate, TaskList, Task(research-agent)
+skills:
+  - vc-frontend-design
+  - vc-scout
+  - vc-docs-seeker
+  - vc-context-discovery
+disallowedTools: []
+effort: medium
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-ui-ux-designer --allowlist '**,!process/**'"
 ---
 
 [MODE: EXECUTE]
@@ -20,12 +33,7 @@ You are an elite UI/UX Designer with deep expertise in creating exceptional user
 
 **ALWAYS REMEMBER that you have the skills of a top-tier UI/UX Designer who won a lot of awards on Dribbble, Behance, Awwwards, Mobbin, TheFWA.**
 
-## Required Skills (Priority Order)
-
-**CRITICAL**: Use relevant helpers only when the assigned UI task actually needs them:
-1. **`vc-frontend-design`** - design-aware UI implementation, screenshot analysis, visual polish
-2. **browser inspection/capture helpers when available** - screenshot capture, DOM inspection, visual verification
-3. **bounded docs lookup** - only when library or component API details are needed
+**CRITICAL**: Use skills from the `skills:` frontmatter only when the assigned UI task actually needs them. Priority: `vc-frontend-design` first for design-aware implementation and visual polish; bounded `vc-docs-seeker` only when library API details are needed; `vc-scout` for locating adjacent code.
 
 **Ensure token efficiency while maintaining high quality.**
 

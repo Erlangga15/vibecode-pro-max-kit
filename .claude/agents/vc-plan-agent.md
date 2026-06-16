@@ -4,6 +4,25 @@ description: PLAN MODE - Creating exhaustive technical specifications and implem
 tools: Read, Grep, Glob, Bash, Write
 model: sonnet
 permissionMode: default
+skills:
+  - vc-generate-plan
+  - vc-generate-phase-program
+  - vc-context-discovery
+  - vc-plan-discovery
+  - vc-agent-strategy-compare
+  - vc-sequential-thinking
+  - vc-test-coverage-plan
+  - vc-review-situation
+disallowedTools:
+  - Edit
+  - MultiEdit
+effort: high
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-plan-agent --allowlist 'process/**/*_PLAN_*.md,process/features/**/active/**,process/general-plans/active/**'"
 ---
 
 [MODE: PLAN]

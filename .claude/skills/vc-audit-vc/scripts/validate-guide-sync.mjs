@@ -52,27 +52,13 @@ function extractInlineBackticks(text) {
 
 const guidePath = "README.md";
 if (!exists(guidePath)) {
-  // No README.md at all — this is a bare user project (not the kit catalog).
-  // Skip all agent/skill table checks, same as when a non-catalog README is present.
-  console.log("[bare-user-project mode] no README.md present — skipping agent/skill table checks");
+  fail("README.md does not exist");
 } else {
   const guideText = read(guidePath);
 
-  // --- Bare-user-project mode detection ---
-  // Kit catalog README.md contains a heading like "### 33 Skills" or "### N Agents".
-  // User projects that don't have the kit catalog README should skip agent/skill table checks.
-  const hasSkillCatalogHeader = /###\s+\d+\s+Skills\b/.test(guideText);
-  const hasAgentCatalogHeader = /#{2,3}\s+\d*\s*Agents\b/.test(guideText);
-  const isKitCatalog = hasSkillCatalogHeader || hasAgentCatalogHeader;
-
-  if (!isKitCatalog) {
-    console.log("[bare-user-project mode] README.md is not the kit catalog — skipping agent/skill table checks");
-  } else {
   // Extract agents from README.md tables (Core + Specialists sections)
   const agentsSectionMatch = guideText.match(/#{2,3} \d* ?Agents\b[\s\S]*?(?=\n#{2,3} [^#]|\n---)/);
-  const rawAgentsSection = agentsSectionMatch ? agentsSectionMatch[0] : "";
-  // Strip HTML comments before extracting backtick names
-  const agentsSection = rawAgentsSection.replace(/<!--[\s\S]*?-->/g, "");
+  const agentsSection = agentsSectionMatch ? agentsSectionMatch[0] : "";
   const guideAgents = extractTableAgents(agentsSection);
 
   // Get disk agents
@@ -96,9 +82,7 @@ if (!exists(guidePath)) {
 
   // Extract skills from all README.md skill catalog section (skills listed inline, not as tables)
   const skillsSectionMatch = guideText.match(/#{2,3} \d+ Skills\b[\s\S]*?(?=\n#{2,3} [^#]|\n---\n\n#{2,3} )/);
-  const rawSkillsSection = skillsSectionMatch ? skillsSectionMatch[0] : "";
-  // Strip HTML comments before extracting backtick names
-  const skillsSection = rawSkillsSection.replace(/<!--[\s\S]*?-->/g, "");
+  const skillsSection = skillsSectionMatch ? skillsSectionMatch[0] : "";
   const guideSkills = extractInlineBackticks(skillsSection);
 
   // Get disk skills that have a SKILL.md
@@ -134,15 +118,11 @@ if (!exists(guidePath)) {
 
   // Check: every GUIDE.md skill should exist on disk
   for (const skill of guideSkills) {
-    // Skip naming-prefix stubs: tokens that end with a hyphen (e.g. `vc-`, `my-`, `team-`)
-    // or are shorter than 5 chars are examples in naming-convention prose, not real skill names.
-    if (skill.endsWith("-") || skill.length < 5) continue;
     // Also check vc--prefixed variant (README.md may list "code-reviewer" which is an agent, not a skill folder)
     if (!diskSkillFolders.has(skill) && !diskSkills.has(skill) && !diskSkills.has(`vc-${skill}`)) {
       warn(`Skill ${skill} listed in README.md but not found on disk`);
     }
   }
-  } // end isKitCatalog
 }
 
 const result = {

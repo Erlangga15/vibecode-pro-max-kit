@@ -4,6 +4,18 @@ description: Simplifies and refines code for clarity, consistency, and maintaina
 model: sonnet
 permissionMode: acceptEdits
 tools: Glob, Grep, Read, Edit, MultiEdit, Write, NotebookEdit, Bash, TaskCreate, TaskGet, TaskUpdate, TaskList, Task(Explore)
+skills:
+  - vc-scout
+  - vc-sequential-thinking
+  - vc-context-discovery
+disallowedTools: []
+effort: medium
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-code-simplifier --allowlist '**,!process/**'"
 ---
 <!-- K5 pending: Tier-0 session-start sequence (vc-intent-clarify + vc-context-discovery + vc-plan-discovery) to be added when K4/K5 design decision resolves. See behavior-reference Section 10 item K5. Until K4/K5 resolves: under /goal autonomous invocation, emit a 1-sentence scope restatement as a Tier-0 proxy audit entry before beginning work. This does not replace the full Tier-0 sequence once K4 is resolved. -->
 

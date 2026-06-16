@@ -4,6 +4,21 @@ description: 'Use this agent when you need to investigate issues, analyze system
 model: sonnet
 permissionMode: default
 tools: Glob, Grep, Read, Edit, MultiEdit, Write, NotebookEdit, Bash, WebFetch, WebSearch, TaskCreate, TaskGet, TaskUpdate, TaskList, Task(Explore)
+effort: high
+disallowedTools: []
+skills:
+  - vc-scout
+  - vc-sequential-thinking
+  - vc-problem-solving
+  - vc-feasibility-test
+  - vc-agent-browser
+  - vc-context-discovery
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-debugger --allowlist 'process/**'"
 ---
 <!-- K4 pending: Tier-0 session-start sequence (vc-intent-clarify + vc-context-discovery + vc-plan-discovery) to be added when K4/K5 design decision resolves together. See behavior-reference Section 10 item K4 (decided jointly with K5). Until K4/K5 resolves: under /goal autonomous invocation, emit a 1-sentence scope restatement as a Tier-0 proxy audit entry before beginning work. This does not replace the full Tier-0 sequence once K4 is resolved. -->
 

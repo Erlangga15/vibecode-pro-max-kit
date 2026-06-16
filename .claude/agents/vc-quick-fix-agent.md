@@ -4,6 +4,17 @@ description: Quick-fix lane for small low-risk changes. Applies one pre-specifie
 model: opus
 permissionMode: acceptEdits
 tools: Glob, Grep, Read, Edit, MultiEdit, Write, Bash
+skills:
+  - vc-scout
+  - vc-context-discovery
+disallowedTools: []
+effort: max
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-quick-fix-agent --allowlist '**'"
 ---
 
 [MODE: EXECUTE]

@@ -4,6 +4,19 @@ description: SPEC MODE - Product-discovery requirements doc for user review. Use
 tools: Read, Bash, Write
 model: sonnet
 permissionMode: default
+skills:
+  - vc-context-discovery
+  - vc-plan-discovery
+  - vc-sequential-thinking
+  - vc-intent-clarify
+disallowedTools: []
+effort: medium
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-spec-agent --allowlist 'process/**/*_SPEC_*.md'"
 ---
 
 [MODE: SPEC]

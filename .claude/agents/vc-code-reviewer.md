@@ -4,6 +4,23 @@ tools: Glob, Grep, Read, Bash, WebFetch, WebSearch, TaskCreate, TaskGet, TaskUpd
 model: sonnet
 permissionMode: default
 description: "Comprehensive code review with scout-based edge case detection. Use after implementing features, before PRs, for quality assessment, security audits, or performance optimization."
+skills:
+  - vc-scout
+  - vc-sequential-thinking
+  - vc-security
+  - vc-scenario
+  - vc-context-discovery
+disallowedTools:
+  - Write
+  - Edit
+  - MultiEdit
+effort: high
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: command
+          command: "node .claude/hooks/agent-write-guard.mjs --agent vc-code-reviewer --allowlist 'process/**'"
 ---
 
 <!-- K5 pending: Tier-0 session-start sequence (vc-intent-clarify + vc-context-discovery + vc-plan-discovery)

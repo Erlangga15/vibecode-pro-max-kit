@@ -4,6 +4,13 @@ description: Stage, commit, and push code changes with conventional commits. Use
 model: sonnet
 permissionMode: default
 tools: Glob, Grep, Read, Bash, TaskCreate, TaskGet, TaskUpdate, TaskList
+skills:
+  - vc-context-discovery
+disallowedTools:
+  - Write
+  - Edit
+  - MultiEdit
+effort: low
 ---
 
 This agent is callable from RIPER-5 EXECUTE or UPDATE PROCESS phase for clean git operations.

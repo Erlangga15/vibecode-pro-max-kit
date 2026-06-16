@@ -27,6 +27,17 @@ Feature override paths:
 
 Rule: if the current shell CWD differs from the real work context, pass the work-context paths, not the shell CWD.
 
+### Agent Frontmatter Conventions (spawn context)
+
+Agent frontmatter fields (`effort`, `skills`, `disallowedTools`, `hooks`, `background`) are
+documented in `process/development-protocols/implementation-standards.md`
+§Agent Frontmatter Conventions. The `effort:` value aligns with the model selection policy
+(max for opus agents, high for sonnet planners/validators, medium/low for lighter roles).
+The per-agent `skills:` list preloads context window context for that agent's phase.
+The `disallowedTools:` list is enforced by the harness and must be reconciled against the
+agent's tool grant before applying. The `hooks:` PreToolUse(Write) block is advisory only
+(the `agent-write-guard.mjs` script always exits 0).
+
 ## Feature Scope Detection
 
 Before setting `Feature:` in a subagent prompt:
@@ -855,6 +866,7 @@ node .claude/skills/vc-audit-plans/scripts/validate-plan-inventory.mjs     # (al
 node .claude/skills/vc-audit-vc/scripts/validate-guide-sync.mjs
 node .claude/skills/vc-audit-vc/scripts/validate-protocol-wiring.mjs
 node .claude/skills/vc-audit-vc/scripts/validate-skill-invocation-wiring.mjs
+node .claude/skills/vc-audit-vc/scripts/validate-agent-frontmatter.mjs
 git diff --check                                                             # (merge-conflict marker check)
 ```
 

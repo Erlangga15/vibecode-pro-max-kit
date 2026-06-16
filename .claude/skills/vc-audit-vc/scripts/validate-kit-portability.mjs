@@ -163,7 +163,7 @@ function isConcreteContextFileRef(ref) {
 }
 
 for (const file of textFiles) {
-  const lines = fs.readFileSync(path.join(root, file), "utf8").replace(/<!--[\s\S]*?-->/g, "").split("\n");
+  const lines = fs.readFileSync(path.join(root, file), "utf8").split("\n");
   lines.forEach((line, index) => {
     for (const match of line.matchAll(/`(process\/context\/[^`\s]+)`/g)) {
       const ref = match[1].replace(/[.,;:]+$/, "");

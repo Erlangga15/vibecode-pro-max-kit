@@ -47,9 +47,13 @@ For context routing, grouping, and discoverability audits, use the `audit-contex
    ```bash
    node .claude/skills/vc-audit-vc/scripts/validate-skill-invocation-wiring.mjs
    ```
-8. If any script reports failures, inspect the referenced files and patch the smallest
+8. Run the agent frontmatter validator:
+   ```bash
+   node .claude/skills/vc-audit-vc/scripts/validate-agent-frontmatter.mjs
+   ```
+9. If any script reports failures, inspect the referenced files and patch the smallest
    relevant surface.
-9. Re-run the failed validators until they pass.
+10. Re-run the failed validators until they pass.
 
 ## Rules
 
