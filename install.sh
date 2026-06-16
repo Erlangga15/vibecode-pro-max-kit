@@ -427,11 +427,23 @@ if [ "$HAS_EXISTING" = true ] && [ -z "$PRIOR_SNAPSHOT" ]; then
 fi
 
 echo ""
-echo "  Next:"
-echo "    1. Run: claude"
-echo '    2. Say: "Run vc-setup"'
-echo ""
-echo "  vc-setup will auto-detect your project, scaffold the process/"
-echo "  directory, deep-scan your codebase, and populate context with"
-echo "  your real architecture, patterns, test commands, and conventions."
+if [ "$HAS_EXISTING" = true ]; then
+  # Upgrade path: existing harness detected before install — route to vc-update
+  echo "  Next (upgrade detected):"
+  echo "    1. Run: claude"
+  echo '    2. Say: "Run vc-update"'
+  echo ""
+  echo "  vc-update will sync the new version and, if it finds old-format plans,"
+  echo "  context docs, or folders, hand you a ready-to-paste prompt to finish"
+  echo "  the migration."
+else
+  # Fresh install path: no prior harness — route to vc-setup
+  echo "  Next:"
+  echo "    1. Run: claude"
+  echo '    2. Say: "Run vc-setup"'
+  echo ""
+  echo "  vc-setup will auto-detect your project, scaffold the process/"
+  echo "  directory, deep-scan your codebase, and populate context with"
+  echo "  your real architecture, patterns, test commands, and conventions."
+fi
 echo ""
