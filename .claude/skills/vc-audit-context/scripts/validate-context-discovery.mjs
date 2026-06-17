@@ -188,6 +188,54 @@ if (!bareKitMode) {
     }
   }
 
+  // --- frontmatter routing contract: keyword coverage + related-link integrity ---
+  // Build a slug registry (context:{slug}) across all context docs first.
+  const contextDocNames = new Set();
+  for (const doc of contextDocs) {
+    if (doc === router) continue;
+    const name = parseFrontmatter(doc).name;
+    if (name) contextDocNames.add(name);
+  }
+  for (const doc of contextDocs) {
+    if (doc === router) continue;
+    const fm = parseFrontmatter(doc);
+    // keywords: required, non-empty — this is the --match routing surface.
+    const keywords = (fm.keywords || "")
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
+    if (keywords.length === 0) {
+      // Warn, not fail: pre-existing context docs created before the keyword-routing
+      // contract should not break a project's lint on sync. New docs get keywords from
+      // the seeds; backfill old ones at UPDATE-PROCESS. Dangling `related` and routing
+      // drift below remain hard failures (real breakage, opt-in only).
+      warn(`${doc} has empty/missing 'keywords' frontmatter (recommended for keyword routing; backfill at UPDATE-PROCESS — see vc-context-discovery)`);
+    }
+    // related: every listed slug must resolve to a real context: doc (no dangling cross-links).
+    const related = (fm.related || "")
+      .replace(/^\[|\]$/g, "")
+      .split(",")
+      .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+      .filter(Boolean);
+    for (const slug of related) {
+      if (!contextDocNames.has(slug)) {
+        fail(`${doc} 'related' references ${slug} which resolves to no context doc (dangling cross-link)`);
+      }
+    }
+  }
+
+  // --- generated routing block must be in sync with frontmatter on disk ---
+  if (routerText.includes("<!-- GENERATED:routing -->")) {
+    try {
+      execSync(
+        `node ${JSON.stringify(path.join(root, ".claude/skills/vc-context-discovery/scripts/discover-context.mjs"))} --check-routing`,
+        { cwd: root, stdio: ["pipe", "pipe", "pipe"] },
+      );
+    } catch {
+      fail(`${router} GENERATED:routing block is stale — run discover-context.mjs --emit-routing to rebuild`);
+    }
+  }
+
   for (const dir of fs.readdirSync(path.join(root, "process/context"), { withFileTypes: true })) {
     if (dir.isDirectory() && !getGroupEntrypoint(dir.name)) {
       fail(`process/context/${dir.name}/ is missing all-${dir.name}.md`);

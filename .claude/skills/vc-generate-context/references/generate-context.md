@@ -87,9 +87,10 @@ Use this table to determine which context groups to create during `standalone-fu
 
 ## Validation
 
-After updating `process/context/all-context.md`, run:
+After updating `process/context/all-context.md`, regenerate the routing tables from frontmatter, then validate:
 
 ```bash
+node .claude/skills/vc-context-discovery/scripts/discover-context.mjs --emit-routing
 node .claude/skills/vc-generate-context/scripts/validate-all-context.mjs
 ```
 
@@ -147,9 +148,8 @@ When populating `all-context.md` from seed templates or from a fresh scan, write
 1. **Title**: Replace the project name placeholder with the actual project name.
 2. **Project description**: Use the user's own words when available (from vc-setup's ASK step). Supplement with what the code scan reveals. The user's description should be prominent, not buried.
 3. **Quick Start section**: Keep the generic routing instructions from the template.
-4. **Current Root Entry Points table**: Populate with actual context files that were created.
-5. **Current Context Groups table**: Populate with groups created by the context group detection step (those groups whose `all-{group}.md` files were just written).
-6. **Task Routing table**: Fill based on what context groups exist, mapping task types to the relevant entry points.
+4. **Current Root Entry Points table** and **Current Context Groups table**: do NOT hand-fill these. They live between `<!-- GENERATED:routing -->` markers and are generated from each group doc's frontmatter. First ensure every `all-{group}.md` you wrote has complete frontmatter (`name: context:all-{group}`, `description`, a non-empty `keywords` list of task-vocabulary terms, optional `related: [context:{slug}]` siblings), then run `node .claude/skills/vc-context-discovery/scripts/discover-context.mjs --emit-routing` to populate both tables.
+6. **Task Routing table**: hand-author this (it maps editorial task types → entry points). Fill based on what context groups exist.
 7. **Repository Structure**: Write actual directory tree output (2-3 levels deep, showing key directories and files).
 8. **Technology Stack**: Write specific framework names, versions, and combinations discovered during analysis.
 9. **Key Patterns and Conventions**: Document actual patterns found in the codebase (error handling, state management, API patterns, naming conventions, import aliases). Include conventions the user mentioned.

@@ -31,6 +31,16 @@ Before reading `all-context.md`, run `find process/context/ -type f | sort` to g
 1. Read `process/context/all-context.md` first.
 2. Load only the relevant root file or context-group entrypoint.
 3. Follow that entrypoint into deeper docs only when needed.
+4. If the task vocabulary does not obviously map to a routing row, run `node .claude/skills/vc-context-discovery/scripts/discover-context.mjs --match "<task>"` to rank docs by frontmatter `keywords` instead of guessing, then load any `related:` siblings it surfaces.
+
+## Frontmatter Contract
+
+Every context doc (including each `all-{group}.md`) carries routing frontmatter — see the canonical schema in `vc-context-discovery`:
+
+- `keywords` (recommended, non-empty): task-vocabulary terms; the match surface for `--match`. Lint warns when empty; backfill at UPDATE-PROCESS.
+- `related` (optional): `context:{slug}` siblings usually needed together. Every slug must resolve to a real doc.
+
+The "Current Root Entry Points" and "Current Context Groups" tables in `all-context.md` are GENERATED from this frontmatter, between `<!-- GENERATED:routing -->` markers. Never hand-edit them — edit the owning doc's frontmatter and re-emit.
 
 ## Context Groups
 
@@ -56,9 +66,9 @@ Create or promote a context group when any of these are true:
 ## Update Rules
 
 - Update the owning context docs whenever code or workflow behavior changes what those docs describe.
-- Update `process/context/all-context.md` whenever a new durable entrypoint is added, renamed, grouped, or removed.
+- When a durable entrypoint is added, renamed, grouped, or removed, edit the doc's frontmatter (`description`/`keywords`/`related`), then regenerate the router tables: `node .claude/skills/vc-context-discovery/scripts/discover-context.mjs --emit-routing`. Do not hand-edit the generated tables in `all-context.md`.
 - Move or split one group at a time so discovery changes stay reviewable.
-- After context-organization changes, run the `vc-audit-context` skill or its validators.
+- After context-organization changes, run the `vc-audit-context` skill or its validators (this includes a `--check-routing` drift check that fails if the generated block is stale).
 
 ## Relationship to Tool Memory
 
