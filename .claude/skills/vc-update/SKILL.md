@@ -86,7 +86,10 @@ node -e "console.log(JSON.parse(require('fs').readFileSync('$VC_UPDATE_TMPDIR/vc
 
 Compare the remote manifest `version` against `currentVersion`.
 
-- If they are equal: report **"Already up to date (vX.Y.Z)"** and clean up `$TMPDIR`. **Stop.**
+- If they are equal: **do NOT stop yet.** Version equality means the deterministic file-sync will be a no-op, but the ADAPTIVE legacy-layout migration (Part D) is NOT version-gated and may still have work to do — e.g. an old project was just brought to the current version by `install.sh` (which writes `.vc-version` but cannot run the adaptive migration), leaving legacy-format dirs un-migrated. So on equal versions, run the **legacy-artifact scan** before deciding:
+  - Scan for any of: flat `*_PLAN_*.md` files directly under `process/general-plans/active/` or `process/features/*/active/`; sibling `process/general-plans/{reports,references}/`; sibling `process/features/*/{reports,references}/`; `process/development-protocols/references/` (any non-empty legacy layout dir in scope per Part D).
+  - **If the scan finds ZERO legacy artifacts:** report **"Already up to date (vX.Y.Z) — no legacy artifacts to migrate"**, clean up `$TMPDIR`, and **Stop.**
+  - **If the scan finds ANY legacy artifacts:** report **"Already up to date (vX.Y.Z), but N legacy artifact(s) found — running content migration"** and CONTINUE to the diff/apply path. The file diff will be empty (no add/modify/delete), but Part D safe legacy-layout migration MUST run so the legacy content is moved into task folders. Skip the version-bump messaging; the version stays the same.
 - If remote is newer (or currentVersion is `0.0.0`): continue to diff.
 - If remote is **older** than `currentVersion`: print `⚠ WARNING: downgrade v{remoteVersion} → v{currentVersion} detected. The source kit is older than your installed version. Continuing will overwrite newer harness files with older ones.` then ask for explicit confirmation before continuing. If the user does not confirm, clean up `$VC_UPDATE_TMPDIR` and stop.
 

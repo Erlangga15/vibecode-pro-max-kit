@@ -206,7 +206,7 @@ Classified as **removals**. Deleted locally after confirmation.
 
 ### Already up to date
 
-If `.vc-version` matches the remote manifest version, report "Already up to date" and exit. No diff computed.
+If `.vc-version` matches the remote manifest version, the deterministic file-sync is a no-op, but the adaptive legacy-layout migration (Part D) is NOT version-gated. Run the legacy-artifact scan first: if zero legacy artifacts exist, report "Already up to date — no legacy artifacts to migrate" and exit (no diff computed); if any legacy artifacts exist (e.g. `install.sh` just bumped `.vc-version` without running migration), report "Already up to date, but N legacy artifact(s) found — running content migration" and continue to the apply path so Part D migrates them (file diff stays empty; version unchanged).
 
 ### Adding a new skill to the kit
 

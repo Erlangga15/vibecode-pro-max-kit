@@ -2,6 +2,12 @@
 
 All notable changes to vibecode-pro-max-kit are documented in this file.
 
+## [3.2.3] - 2026-06-20
+
+### Fixed
+
+- `vc-update` no longer skips the adaptive content migration when the installed version already matches the remote. Previously, version equality (`Step 5: Compare Versions`) stopped the run immediately — but the deterministic `install.sh` writes `.vc-version` to the new version *without* being able to run the adaptive legacy-layout migration (it has no agent). The documented upgrade flow is "run `curl install.sh | bash`, then run `vc-update` to finish migrating old folders" — yet `vc-update` would bail with "Already up to date. No changes applied," stranding legacy `reports/`/`references/` dirs and flat plans un-migrated. Now version equality runs a legacy-artifact scan first: if legacy-format dirs/plans exist, `vc-update` continues to the apply path and Part D migrates them into task folders (file diff stays empty, version unchanged); only when no legacy artifacts remain does it report up-to-date and stop. Fixed in both the skill body and the `references/vc-update.md` deep reference.
+
 ## [3.2.2] - 2026-06-20
 
 ### Fixed
