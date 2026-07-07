@@ -4,7 +4,7 @@ Part of vibecode-pro-max-kit
 
 ## Scope
 
-Third-platform adapter work to bring Cursor IDE to parity with existing Claude Code (`.claude/`) and Codex (`.codex/`) harness surfaces. Covers `.cursor/` hooks and rules, agent compat fields, manifest/install wiring, enforcement POC, and audit extensions — not Cursor Cloud Automations.
+Cursor-first harness migration: self-contained `.cursor/` tree (agents, skills as full copies, rules, hooks), dedicated `cursor-first` install profile, and AGENTS.md-only orchestrator — plus unchanged full/legacy profile for Claude+Codex. Not Cursor Cloud Automations. Supersedes Tier B adapter approach (extend `.claude/agents`).
 
 ## Key Source Files
 
